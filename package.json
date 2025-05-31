@@ -2,6 +2,7 @@
   "name": "fin-proto-vscode",
   "displayName": "fin-proto-vscode",
   "description": "financial binary proto dsl plugin",
+  "license": "MIT",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.100.0"
@@ -20,7 +21,7 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "yarn run package",
+    "vscode:prepublish": "yarn compile",
     "compile": "yarn run check-types && yarn run lint && node esbuild.js",
     "watch": "npm-run-all -p watch:*",
     "watch:esbuild": "node esbuild.js --watch",

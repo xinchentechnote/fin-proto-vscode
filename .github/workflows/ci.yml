@@ -40,5 +40,5 @@ jobs:
       
       - name: Install vsce
         run: yarn global add vsce
-      # - name: Package extension
-      #   run: yarn package
+      - name: Package extension
+        run: yarn package
