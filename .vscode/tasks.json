@@ -4,6 +4,23 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "yarn compile",
+            "type": "shell",
+            "command": "yarn",
+            "args": [
+                "compile"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+        {
             "label": "watch",
             "dependsOn": [
                 "yarn: watch:tsc",

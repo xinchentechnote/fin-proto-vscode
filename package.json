@@ -15,8 +15,12 @@
   "contributes": {
     "commands": [
       {
-        "command": "fin-proto-vscode.helloWorld",
-        "title": "Hello World"
+        "command": "fin-proto-vscode.format",
+        "title": "fin-proto:format"
+      },
+      {
+        "command": "fin-proto-vscode.compile",
+        "title": "fin-proto:compile"
       }
     ]
   },
