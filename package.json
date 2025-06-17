@@ -22,6 +22,27 @@
         "command": "fin-proto-vscode.compile",
         "title": "fin-proto:compile"
       }
+    ],
+    "grammars": [
+      {
+        "language": "packetdsl",
+        "scopeName": "source.packetdsl",
+        "path": "./syntaxes/packetdsl.tmLanguage.json"
+      }
+    ],
+    "languages": [
+      {
+        "id": "packetdsl",
+        "aliases": [
+          "PacketDSL",
+          "packetdsl"
+        ],
+        "extensions": [
+          ".pdsl",
+          ".dsl"
+        ],
+        "configuration": "./language-configuration.json"
+      }
     ]
   },
   "scripts": {

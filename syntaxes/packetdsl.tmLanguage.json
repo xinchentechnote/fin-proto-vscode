@@ -1,0 +1,75 @@
+{
+    "name": "PacketDsl",
+    "patterns": [
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#types"
+        },
+        {
+            "include": "#literals"
+        },
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#identifiers"
+        }
+    ],
+    "repository": {
+        "keywords": {
+            "patterns": [
+                {
+                    "match": "\\b(root|packet|repeat|MetaData|match|options)\\b",
+                    "name": "keyword.control.packetdsl"
+                }
+            ]
+        },
+        "types": {
+            "patterns": [
+                {
+                    "match": "\\b(u?int(8|16|32|64)|i(8|16|32|64)|f32|f64|float32|float64|string|char)\\b",
+                    "name": "storage.type.packetdsl"
+                }
+            ]
+        },
+        "literals": {
+            "patterns": [
+                {
+                    "match": "\"([^\"\\\\]|\\\\.)*\"",
+                    "name": "string.quoted.double.packetdsl"
+                },
+                {
+                    "match": "`[^`\r\n]*`",
+                    "name": "string.quoted.other.packetdsl"
+                },
+                {
+                    "match": "\\b\\d+\\b",
+                    "name": "constant.numeric.packetdsl"
+                }
+            ]
+        },
+        "comments": {
+            "patterns": [
+                {
+                    "match": "//.*$",
+                    "name": "comment.line.double-slash.packetdsl"
+                }
+            ]
+        },
+        "identifiers": {
+            "patterns": [
+                {
+                    "match": "\\b[a-zA-Z_][a-zA-Z_0-9]*\\b",
+                    "name": "variable.other.packetdsl"
+                }
+            ]
+        }
+    },
+    "scopeName": "source.packetdsl",
+    "fileTypes": [
+        "pdsl"
+    ],
+    "uuid": "d84686f0-9cd9-4563-9d08-abcdef123456"
+}
