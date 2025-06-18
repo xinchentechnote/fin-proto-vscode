@@ -23,6 +23,9 @@ import { VocabularyImpl } from "antlr4ts/VocabularyImpl";
 
 import * as Utils from "antlr4ts/misc/Utils";
 
+import { PacketDslListener } from "./PacketDslListener";
+import { PacketDslVisitor } from "./PacketDslVisitor";
+
 
 export class PacketDslParser extends Parser {
 	public static readonly T__0 = 1;
@@ -1081,6 +1084,26 @@ export class PacketContext extends ParserRuleContext {
 	}
 	// @Override
 	public get ruleIndex(): number { return PacketDslParser.RULE_packet; }
+	// @Override
+	public enterRule(listener: PacketDslListener): void {
+		if (listener.enterPacket) {
+			listener.enterPacket(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: PacketDslListener): void {
+		if (listener.exitPacket) {
+			listener.exitPacket(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PacketDslVisitor<Result>): Result {
+		if (visitor.visitPacket) {
+			return visitor.visitPacket(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -1099,6 +1122,26 @@ export class OptionDefinitionContext extends ParserRuleContext {
 	}
 	// @Override
 	public get ruleIndex(): number { return PacketDslParser.RULE_optionDefinition; }
+	// @Override
+	public enterRule(listener: PacketDslListener): void {
+		if (listener.enterOptionDefinition) {
+			listener.enterOptionDefinition(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: PacketDslListener): void {
+		if (listener.exitOptionDefinition) {
+			listener.exitOptionDefinition(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PacketDslVisitor<Result>): Result {
+		if (visitor.visitOptionDefinition) {
+			return visitor.visitOptionDefinition(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -1113,6 +1156,26 @@ export class OptionDeclarationContext extends ParserRuleContext {
 	}
 	// @Override
 	public get ruleIndex(): number { return PacketDslParser.RULE_optionDeclaration; }
+	// @Override
+	public enterRule(listener: PacketDslListener): void {
+		if (listener.enterOptionDeclaration) {
+			listener.enterOptionDeclaration(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: PacketDslListener): void {
+		if (listener.exitOptionDeclaration) {
+			listener.exitOptionDeclaration(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PacketDslVisitor<Result>): Result {
+		if (visitor.visitOptionDeclaration) {
+			return visitor.visitOptionDeclaration(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -1134,6 +1197,26 @@ export class PacketDefinitionContext extends ParserRuleContext {
 	}
 	// @Override
 	public get ruleIndex(): number { return PacketDslParser.RULE_packetDefinition; }
+	// @Override
+	public enterRule(listener: PacketDslListener): void {
+		if (listener.enterPacketDefinition) {
+			listener.enterPacketDefinition(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: PacketDslListener): void {
+		if (listener.exitPacketDefinition) {
+			listener.exitPacketDefinition(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PacketDslVisitor<Result>): Result {
+		if (visitor.visitPacketDefinition) {
+			return visitor.visitPacketDefinition(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -1157,6 +1240,26 @@ export class InerObjectFieldContext extends FieldDefinitionContext {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
+	// @Override
+	public enterRule(listener: PacketDslListener): void {
+		if (listener.enterInerObjectField) {
+			listener.enterInerObjectField(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: PacketDslListener): void {
+		if (listener.exitInerObjectField) {
+			listener.exitInerObjectField(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PacketDslVisitor<Result>): Result {
+		if (visitor.visitInerObjectField) {
+			return visitor.visitInerObjectField(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 export class MetaFieldContext extends FieldDefinitionContext {
 	public metaDataDeclaration(): MetaDataDeclarationContext {
@@ -1167,6 +1270,26 @@ export class MetaFieldContext extends FieldDefinitionContext {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
+	// @Override
+	public enterRule(listener: PacketDslListener): void {
+		if (listener.enterMetaField) {
+			listener.enterMetaField(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: PacketDslListener): void {
+		if (listener.exitMetaField) {
+			listener.exitMetaField(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PacketDslVisitor<Result>): Result {
+		if (visitor.visitMetaField) {
+			return visitor.visitMetaField(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 export class ObjectFieldContext extends FieldDefinitionContext {
 	public IDENTIFIER(): TerminalNode { return this.getToken(PacketDslParser.IDENTIFIER, 0); }
@@ -1175,6 +1298,26 @@ export class ObjectFieldContext extends FieldDefinitionContext {
 	constructor(ctx: FieldDefinitionContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
+	}
+	// @Override
+	public enterRule(listener: PacketDslListener): void {
+		if (listener.enterObjectField) {
+			listener.enterObjectField(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: PacketDslListener): void {
+		if (listener.exitObjectField) {
+			listener.exitObjectField(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PacketDslVisitor<Result>): Result {
+		if (visitor.visitObjectField) {
+			return visitor.visitObjectField(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
 	}
 }
 export class MatchFieldContext extends FieldDefinitionContext {
@@ -1185,6 +1328,26 @@ export class MatchFieldContext extends FieldDefinitionContext {
 	constructor(ctx: FieldDefinitionContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
+	}
+	// @Override
+	public enterRule(listener: PacketDslListener): void {
+		if (listener.enterMatchField) {
+			listener.enterMatchField(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: PacketDslListener): void {
+		if (listener.exitMatchField) {
+			listener.exitMatchField(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PacketDslVisitor<Result>): Result {
+		if (visitor.visitMatchField) {
+			return visitor.visitMatchField(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
 	}
 }
 
@@ -1206,6 +1369,26 @@ export class MetaDataDefinitionContext extends ParserRuleContext {
 	}
 	// @Override
 	public get ruleIndex(): number { return PacketDslParser.RULE_metaDataDefinition; }
+	// @Override
+	public enterRule(listener: PacketDslListener): void {
+		if (listener.enterMetaDataDefinition) {
+			listener.enterMetaDataDefinition(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: PacketDslListener): void {
+		if (listener.exitMetaDataDefinition) {
+			listener.exitMetaDataDefinition(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PacketDslVisitor<Result>): Result {
+		if (visitor.visitMetaDataDefinition) {
+			return visitor.visitMetaDataDefinition(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -1221,6 +1404,26 @@ export class MetaDataDeclarationContext extends ParserRuleContext {
 	}
 	// @Override
 	public get ruleIndex(): number { return PacketDslParser.RULE_metaDataDeclaration; }
+	// @Override
+	public enterRule(listener: PacketDslListener): void {
+		if (listener.enterMetaDataDeclaration) {
+			listener.enterMetaDataDeclaration(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: PacketDslListener): void {
+		if (listener.exitMetaDataDeclaration) {
+			listener.exitMetaDataDeclaration(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PacketDslVisitor<Result>): Result {
+		if (visitor.visitMetaDataDeclaration) {
+			return visitor.visitMetaDataDeclaration(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -1235,6 +1438,26 @@ export class ValueContext extends ParserRuleContext {
 	}
 	// @Override
 	public get ruleIndex(): number { return PacketDslParser.RULE_value; }
+	// @Override
+	public enterRule(listener: PacketDslListener): void {
+		if (listener.enterValue) {
+			listener.enterValue(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: PacketDslListener): void {
+		if (listener.exitValue) {
+			listener.exitValue(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PacketDslVisitor<Result>): Result {
+		if (visitor.visitValue) {
+			return visitor.visitValue(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -1256,6 +1479,26 @@ export class TypeContext extends ParserRuleContext {
 	}
 	// @Override
 	public get ruleIndex(): number { return PacketDslParser.RULE_type; }
+	// @Override
+	public enterRule(listener: PacketDslListener): void {
+		if (listener.enterType) {
+			listener.enterType(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: PacketDslListener): void {
+		if (listener.exitType) {
+			listener.exitType(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PacketDslVisitor<Result>): Result {
+		if (visitor.visitType) {
+			return visitor.visitType(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -1276,6 +1519,26 @@ export class MatchFieldDeclarationContext extends ParserRuleContext {
 	}
 	// @Override
 	public get ruleIndex(): number { return PacketDslParser.RULE_matchFieldDeclaration; }
+	// @Override
+	public enterRule(listener: PacketDslListener): void {
+		if (listener.enterMatchFieldDeclaration) {
+			listener.enterMatchFieldDeclaration(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: PacketDslListener): void {
+		if (listener.exitMatchFieldDeclaration) {
+			listener.exitMatchFieldDeclaration(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PacketDslVisitor<Result>): Result {
+		if (visitor.visitMatchFieldDeclaration) {
+			return visitor.visitMatchFieldDeclaration(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -1293,6 +1556,26 @@ export class MatchPairContext extends ParserRuleContext {
 	}
 	// @Override
 	public get ruleIndex(): number { return PacketDslParser.RULE_matchPair; }
+	// @Override
+	public enterRule(listener: PacketDslListener): void {
+		if (listener.enterMatchPair) {
+			listener.enterMatchPair(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: PacketDslListener): void {
+		if (listener.exitMatchPair) {
+			listener.exitMatchPair(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PacketDslVisitor<Result>): Result {
+		if (visitor.visitMatchPair) {
+			return visitor.visitMatchPair(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -1312,6 +1595,26 @@ export class InerObjectDeclarationContext extends ParserRuleContext {
 	}
 	// @Override
 	public get ruleIndex(): number { return PacketDslParser.RULE_inerObjectDeclaration; }
+	// @Override
+	public enterRule(listener: PacketDslListener): void {
+		if (listener.enterInerObjectDeclaration) {
+			listener.enterInerObjectDeclaration(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: PacketDslListener): void {
+		if (listener.exitInerObjectDeclaration) {
+			listener.exitInerObjectDeclaration(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PacketDslVisitor<Result>): Result {
+		if (visitor.visitInerObjectDeclaration) {
+			return visitor.visitInerObjectDeclaration(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -1348,6 +1651,26 @@ export class ListContext extends ParserRuleContext {
 	}
 	// @Override
 	public get ruleIndex(): number { return PacketDslParser.RULE_list; }
+	// @Override
+	public enterRule(listener: PacketDslListener): void {
+		if (listener.enterList) {
+			listener.enterList(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: PacketDslListener): void {
+		if (listener.exitList) {
+			listener.exitList(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PacketDslVisitor<Result>): Result {
+		if (visitor.visitList) {
+			return visitor.visitList(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
