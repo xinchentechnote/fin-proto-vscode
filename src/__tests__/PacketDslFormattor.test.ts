@@ -7,6 +7,10 @@ describe('PacketDslFormattor', () => {
       repeat   int32 id \`identifier\`,
       // comment
       string name \`name\`,   // comment
+    match MsgType {
+      1  : Logon,
+      [2,3]  : Logout
+  }
     }
     `;
 
@@ -14,6 +18,10 @@ describe('PacketDslFormattor', () => {
     repeat int32 id \`identifier\`,
     // comment
     string name \`name\`,// comment
+    match MsgType {
+        1 : Logon,
+        [2,3] : Logout
+    }
 }`;
 
     const output = formatDsl(input);

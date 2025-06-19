@@ -3,7 +3,7 @@ import { PacketDslVisitor } from './antlr4/PacketDslVisitor';
 import { CharStreams, CommonTokenStream, Token } from 'antlr4ts';
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode';
 import { PacketDslLexer } from './antlr4/PacketDslLexer';
-import { InerObjectFieldContext, MatchFieldDeclarationContext, MetaDataDeclarationContext, MetaDataDefinitionContext, MetaFieldContext, ObjectFieldContext, OptionDeclarationContext, OptionDefinitionContext, PacketContext, PacketDefinitionContext, PacketDslParser } from './antlr4/PacketDslParser';
+import { InerObjectFieldContext, MatchFieldContext, MatchFieldDeclarationContext, MetaDataDeclarationContext, MetaDataDefinitionContext, MetaFieldContext, ObjectFieldContext, OptionDeclarationContext, OptionDefinitionContext, PacketContext, PacketDefinitionContext, PacketDslParser } from './antlr4/PacketDslParser';
 
 export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
   implements PacketDslVisitor<string> {
@@ -72,7 +72,18 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
     if (ctx.ROOT()) {lines.push('root ');}
     lines.push(`packet ${ctx.IDENTIFIER()?.text} {\n`);
     for (const field of ctx.fieldDefinition() ?? []) {
-      lines.push(addIdent4ln(this.visit(field)));
+      if(field instanceof MetaFieldContext){
+        lines.push(addIdent4ln(this.visitMetaField(field)));
+      }
+      if(field instanceof ObjectFieldContext){
+        lines.push(addIdent4ln(this.visitObjectField(field)));
+      }
+      if(field instanceof InerObjectFieldContext){
+        lines.push(addIdent4ln(this.visitInerObjectField(field)));
+      }
+      if(field instanceof MatchFieldContext){
+        lines.push(addIdent4ln(this.visitMatchField(field)));
+      }
     }
     lines.push('}');
     lines.push(this.getHiddenRight(ctx.stop));
@@ -158,6 +169,11 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
     return lines.join('');
   }
 
+
+  visitMatchField(ctx: MatchFieldContext): string {
+    return this.visitMatchFieldDeclaration(ctx.matchFieldDeclaration()) + (ctx.COMMA() ? ',' : '');
+  }
+
   visitMatchFieldDeclaration(ctx: MatchFieldDeclarationContext): string {
     const lines: string[] = [];
     lines.push(this.getHiddenLeft(ctx.start));
@@ -165,7 +181,15 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
     for (const pair of ctx.matchPair() ?? []) {
       const leftHidden = this.getHiddenLeft(pair.start).trim();
       if (leftHidden) {lines.push('    ' + leftHidden + '\n');}
-      const key = pair.STRING()?.text ?? pair.DIGITS()?.text ?? '';
+      let key = '';
+      if(pair.DIGITS()){
+        key = pair.DIGITS()?.text ?? '';
+      } else if(pair.STRING()){
+        key = pair.STRING()?.text ?? '';
+      } else if(pair.list()){
+        key = pair.list()?.text ?? '';
+      }
+      pair.STRING()?.text ?? pair.DIGITS()?.text ?? '';
       const value = pair.IDENTIFIER()?.text ?? '';
       lines.push(addIdent4ln(`${key} : ${value}${pair.COMMA() ? ',' : ''}`));
       const rightHidden = this.getHiddenRight(pair.stop).trim();
