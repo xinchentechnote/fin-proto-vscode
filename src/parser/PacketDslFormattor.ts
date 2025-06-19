@@ -41,7 +41,7 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
           return '\n' + t.text;
         }
         return t.text;
-      }).join('\n');
+      }).join('');
   }
 
   visitPacket(ctx: PacketContext): string {
@@ -124,12 +124,19 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
   }
 
   visitMetaDataDeclaration(ctx: MetaDataDeclarationContext): string {
-    const type = ctx.type()?.text ?? '';
-    const name = ctx.IDENTIFIER()?.text ?? '';
-    const comment = ctx.STRING_LITERAL()?.text ?? '';
-    const comma = ctx.COMMA() ? ',' : '';
+    let formatted = "";
+    if(ctx.type()){
+      formatted += ctx.type()?.text + ' ';
+    }
+    formatted += ctx.IDENTIFIER().text;
+    if(ctx.STRING_LITERAL()){
+      formatted += ' ' + ctx.STRING_LITERAL()?.text;
+    }  
+    if(ctx.COMMA()){
+      formatted += ctx.COMMA()?.text;
+    }
     const lineComment = this.getHiddenRight(ctx.stop);
-    return `${type} ${name} ${comment}${comma}${lineComment ? lineComment : ''}`;
+    return `${formatted}${lineComment ? lineComment : ''}`;
   }
 
   visitMetaField(ctx: MetaFieldContext) : string {
@@ -187,13 +194,20 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
       } else if(pair.STRING()){
         key = pair.STRING()?.text ?? '';
       } else if(pair.list()){
-        key = pair.list()?.text ?? '';
+        const items: string[] = [];
+        for (const num of pair.list()!.DIGITS()) {
+            items.push(num.text);
+        }
+        for (const num of pair.list()!.STRING()) {
+            items.push(num.text);
+        }
+        key = formatStringList(items, 5);
       }
       pair.STRING()?.text ?? pair.DIGITS()?.text ?? '';
       const value = pair.IDENTIFIER()?.text ?? '';
       lines.push(addIdent4ln(`${key} : ${value}${pair.COMMA() ? ',' : ''}`));
       const rightHidden = this.getHiddenRight(pair.stop).trim();
-      if (rightHidden) {lines.push('    ' + rightHidden + '\n');}
+      if (rightHidden) {lines.push(addIdent4ln(rightHidden));}
     }
     lines.push('}');
     lines.push(this.getHiddenRight(ctx.stop));
@@ -209,6 +223,28 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
   }
 }
 
+function formatStringList(values: string[], itemsPerLine: number): string {
+    let result = '';
+    
+    if (values.length <= itemsPerLine) {
+        return `[${values.join(', ')}]`;
+    }
+
+    for (let idx = 0; idx < values.length; idx++) {
+        if (idx !== 0 && idx % itemsPerLine === 0) {
+            result += '\n';
+        }
+        result += values[idx];
+        if (idx !== values.length - 1) {
+            result += ',';
+            if ((idx + 1) % itemsPerLine !== 0) {
+                result += ' ';
+            }
+        }
+    }
+
+    return `[\n${addIdent4ln(result)}]`;
+}
 
 function addIdent4ln(value : string): string {
   return addIdent4(value)+"\n";

@@ -20,7 +20,7 @@ describe('PacketDslFormattor', () => {
     string name \`name\`,// comment
     match MsgType {
         1 : Logon,
-        [2,3] : Logout
+        [2, 3] : Logout
     }
 }`;
 
