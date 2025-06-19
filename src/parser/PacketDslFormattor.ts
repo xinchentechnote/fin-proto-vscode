@@ -3,7 +3,7 @@ import { PacketDslVisitor } from './antlr4/PacketDslVisitor';
 import { CharStreams, CommonTokenStream, Token } from 'antlr4ts';
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode';
 import { PacketDslLexer } from './antlr4/PacketDslLexer';
-import { InerObjectFieldContext, MatchFieldDeclarationContext, MetaDataDeclarationContext, MetaDataDefinitionContext, OptionDeclarationContext, OptionDefinitionContext, PacketContext, PacketDefinitionContext, PacketDslParser } from './antlr4/PacketDslParser';
+import { InerObjectFieldContext, MatchFieldDeclarationContext, MetaDataDeclarationContext, MetaDataDefinitionContext, MetaFieldContext, ObjectFieldContext, OptionDeclarationContext, OptionDefinitionContext, PacketContext, PacketDefinitionContext, PacketDslParser } from './antlr4/PacketDslParser';
 
 export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
   implements PacketDslVisitor<string> {
@@ -37,6 +37,9 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
       .filter(t => t.type === PacketDslParser.LINE_COMMENT && !this.lineComments.has(t))
       .map(t => {
         this.lineComments.add(t);
+        if(token?.line !== t?.line){
+          return '\n' + t.text;
+        }
         return t.text;
       }).join('\n');
   }
@@ -46,6 +49,7 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
     lines.push(this.getHiddenLeft(ctx.start));
 
     for (const child of ctx.children ?? []) {
+      lines.push('\n');
       lines.push('\n');
       if (child instanceof PacketDefinitionContext) {
         lines.push(this.visitPacketDefinition(child));
@@ -58,7 +62,7 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
       }
     }
 
-    lines.push('\n' + this.getHiddenRight(ctx.stop));
+    lines.push(this.getHiddenRight(ctx.stop));
     return lines.join('').trim();
   }
 
@@ -68,7 +72,7 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
     if (ctx.ROOT()) {lines.push('root ');}
     lines.push(`packet ${ctx.IDENTIFIER()?.text} {\n`);
     for (const field of ctx.fieldDefinition() ?? []) {
-      lines.push('    ' + this.visit(field) + '\n');
+      lines.push(addIdent4ln(this.visit(field)));
     }
     lines.push('}');
     lines.push(this.getHiddenRight(ctx.stop));
@@ -114,7 +118,31 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
     const comment = ctx.STRING_LITERAL()?.text ?? '';
     const comma = ctx.COMMA() ? ',' : '';
     const lineComment = this.getHiddenRight(ctx.stop);
-    return `${type} ${name} ${comment}${comma}${lineComment ? '\n' + lineComment : ''}`;
+    return `${type} ${name} ${comment}${comma}${lineComment ? lineComment : ''}`;
+  }
+
+  visitMetaField(ctx: MetaFieldContext) : string {
+    const lines:string[]=[];
+    lines.push(this.getHiddenLeft(ctx.start));
+    var repeat = "";
+    if (ctx.REPEAT()){
+      repeat = 'repeat ';
+    }
+    lines.push(repeat + this.visitMetaDataDeclaration(ctx.metaDataDeclaration()));
+    lines.push(this.getHiddenRight(ctx.stop));
+    return lines.join('');
+  }
+
+  visitObjectField(ctx: ObjectFieldContext) : string {
+    const lines:string[]=[];
+    lines.push(this.getHiddenLeft(ctx.start));
+    var repeat = "";
+    if (ctx.REPEAT()){
+      repeat = 'repeat ';
+    }
+    lines.push(repeat + ctx.IDENTIFIER().text + (ctx.COMMA()?.text ?? ''));
+    lines.push(this.getHiddenRight(ctx.stop));
+    return lines.join('');
   }
 
   visitInerObjectField(ctx: InerObjectFieldContext): string {
@@ -123,9 +151,9 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
     if (ctx.REPEAT()) {lines.push('repeat ');}
     lines.push(`${ctx.inerObjectDeclaration().IDENTIFIER()?.text} {\n`);
     for (const fd of ctx.inerObjectDeclaration().fieldDefinition() ?? []) {
-      lines.push('        ' + this.visit(fd) + '\n');
+      lines.push(addIdent4ln(this.visit(fd)));
     }
-    lines.push('    }');
+    lines.push('}');
     lines.push(this.getHiddenRight(ctx.stop));
     return lines.join('');
   }
@@ -139,7 +167,7 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
       if (leftHidden) {lines.push('    ' + leftHidden + '\n');}
       const key = pair.STRING()?.text ?? pair.DIGITS()?.text ?? '';
       const value = pair.IDENTIFIER()?.text ?? '';
-      lines.push(`    ${key} : ${value}${pair.COMMA() ? ',' : ''}\n`);
+      lines.push(addIdent4ln(`${key} : ${value}${pair.COMMA() ? ',' : ''}`));
       const rightHidden = this.getHiddenRight(pair.stop).trim();
       if (rightHidden) {lines.push('    ' + rightHidden + '\n');}
     }
@@ -155,6 +183,20 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
   visit(ctx: any): string {
     return super.visit(ctx) ?? '';
   }
+}
+
+
+function addIdent4ln(value : string): string {
+  return addIdent4(value)+"\n";
+}
+
+function addIdent4(value : string): string {
+  return addIdent(value,4);
+}
+
+function addIdent(value : string, count: number): string {
+  const ident = ' '.repeat(count);
+  return value.split("\n").map(line=>ident+line).join("\n");
 }
 
 export function formatDsl(dsl: string): string {

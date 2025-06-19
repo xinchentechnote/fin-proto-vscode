@@ -4,14 +4,16 @@ describe('PacketDslFormattor', () => {
   it('formats a simple packet definition', () => {
     const input = `
     packet MyPacket {
-      int32 id \`identifier\`,
-      string name \`name\`,
+      repeat   int32 id \`identifier\`,
+      // comment
+      string name \`name\`,   // comment
     }
     `;
 
     const expected = `packet MyPacket {
-    int32 id \`identifier\`,
-    string name \`name\`,
+    repeat int32 id \`identifier\`,
+    // comment
+    string name \`name\`,// comment
 }`;
 
     const output = formatDsl(input);
