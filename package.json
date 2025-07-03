@@ -51,7 +51,7 @@
   },
   "scripts": {
     "vscode:prepublish": "yarn compile",
-    "gen": "npx antlr4ts -o src/parser -visitor asubmodules/fin-protoc/grammar/PacketDsl.g4",
+    "gen": "npx antlr4ts -o src/parser -visitor submodules/fin-protoc/grammar/PacketDsl.g4",
     "compile": "yarn run check-types && yarn run lint && node esbuild.js",
     "watch": "npm-run-all -p watch:*",
     "watch:esbuild": "node esbuild.js --watch",
