@@ -1,0 +1,6 @@
+[submodule "submodules/fin-protoc"]
+	path = submodules/fin-protoc
+	url = git@github.com:xinchentechnote/fin-protoc.git
+[submodule "submodules/fin-proto"]
+	path = submodules/fin-proto
+	url = git@github.com:xinchentechnote/fin-proto.git
