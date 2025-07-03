@@ -128,7 +128,10 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
     if(ctx.type()){
       formatted += ctx.type()?.text + ' ';
     }
-    formatted += ctx.IDENTIFIER().text;
+    formatted += ctx._name.text;
+    if (ctx._from) {
+      formatted += ` lengthof(${ctx._from.text})`;
+    }
     if(ctx.STRING_LITERAL()){
       formatted += ' ' + ctx.STRING_LITERAL()?.text;
     }  
@@ -184,7 +187,7 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
   visitMatchFieldDeclaration(ctx: MatchFieldDeclarationContext): string {
     const lines: string[] = [];
     lines.push(this.getHiddenLeft(ctx.start));
-    lines.push(`match ${ctx.IDENTIFIER().text} {\n`);
+    lines.push(`match ${ctx._matchKey.text} as ${ctx._matchName.text} {\n`);
     for (const pair of ctx.matchPair() ?? []) {
       const leftHidden = this.getHiddenLeft(pair.start).trim();
       if (leftHidden) {lines.push('    ' + leftHidden + '\n');}

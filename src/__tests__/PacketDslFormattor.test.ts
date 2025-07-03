@@ -7,10 +7,10 @@ describe('PacketDslFormattor', () => {
       repeat   int32 id \`identifier\`,
       // comment
       string name \`name\`,   // comment
-    match MsgType {
+    match MsgType as Payload {
       1  : Logon,
-      [2,3]  : Logout
-  }
+      [2,3]  : Logout,
+  },
     }
     `;
 
@@ -18,10 +18,10 @@ describe('PacketDslFormattor', () => {
     repeat int32 id \`identifier\`,
     // comment
     string name \`name\`,// comment
-    match MsgType {
+    match MsgType as Payload {
         1 : Logon,
-        [2, 3] : Logout
-    }
+        [2, 3] : Logout,
+    },
 }`;
 
     const output = formatDsl(input);
@@ -69,10 +69,10 @@ describe('PacketDslFormattor', () => {
   it('preserves match block', () => {
     const input = `
     packet OrderType {
-      match type {
+      match type as Body {
         "1": Limit,
         "2": Market,
-      }
+      },
     }`;
 
     const output = formatDsl(input);

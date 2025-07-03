@@ -82,7 +82,7 @@ export class PacketDslModelParser
       const name = ctx.IDENTIFIER().text;
       const isRepeat = !!ctx.REPEAT();
       const type = this.model.getMetaDataType(name) || name;
-      return new Field(name, type, isRepeat);
+      return new Field(name, type,undefined, isRepeat);
     }
 
     if (ctx instanceof InerObjectFieldContext) {
@@ -115,26 +115,27 @@ export class PacketDslModelParser
     }
 
     const pkt = new Packet(name, false, subFields);
-    return new Field(name, '', isRepeat, pkt);
+    return new Field(name, '', undefined, isRepeat, pkt);
   }
 
   visitMetaDataDeclaration(ctx: MetaDataDeclarationContext): Field {
-    const name = ctx.IDENTIFIER().text;
+    const name = ctx._name.text ?? '';
+    const lengthOfField = ctx._from?.text ?? '';
     const typeText = ctx.type()?.text || name;
     const doc = ctx.STRING_LITERAL()?.text?.slice(1, -1) || '';
     const baseType = this.model.getMetaDataType(typeText) || typeText;
-    return new Field(name, baseType, false, undefined, doc);
+    return new Field(name, baseType, lengthOfField, false, undefined, doc);
   }
 
   visitMatchFieldDeclaration(ctx: MatchFieldDeclarationContext): Field {
-    const name = ctx.IDENTIFIER().text;
+    const name = ctx._matchKey.text ?? "";
     const pairs: MatchPair[] = [];
 
     for (const pair of ctx.matchPair()) {
       pairs.push(...this.visitMatchPair(pair));
     }
 
-    return new Field(name, 'match', false, undefined, '', name, pairs);
+    return new Field(name, 'match',undefined, false, undefined, '', name, pairs);
   }
 
   visitMatchPair(ctx: MatchPairContext): MatchPair[] {
@@ -159,7 +160,7 @@ export class PacketDslModelParser
 
   visitMetaDataDefinition(ctx: MetaDataDefinitionContext): void {
     for (const dec of ctx.metaDataDeclaration()) {
-      const name = dec.IDENTIFIER().text;
+      const name = dec._name.text??"";
       const type = dec.type()?.text || name;
       const basicType = type;
       const description = dec.STRING_LITERAL()?.text || '';

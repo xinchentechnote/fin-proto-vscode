@@ -46,6 +46,7 @@ export class Field {
   constructor(
     public name: string,
     public type: string,
+    public lengthOfField?: string,
     public isRepeat: boolean = false,
     public inerObject?: Packet,
     public doc: string = "",

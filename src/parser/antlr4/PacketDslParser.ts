@@ -1,4 +1,4 @@
-// Generated from antlr4/PacketDsl.g4 by ANTLR 4.9.0-SNAPSHOT
+// Generated from PacketDsl.g4 by ANTLR 4.9.0-SNAPSHOT
 
 
 import { ATN } from "antlr4ts/atn/ATN";
@@ -37,30 +37,33 @@ export class PacketDslParser extends Parser {
 	public static readonly T__6 = 7;
 	public static readonly T__7 = 8;
 	public static readonly T__8 = 9;
-	public static readonly UINT8 = 10;
-	public static readonly UINT16 = 11;
-	public static readonly UINT32 = 12;
-	public static readonly UINT64 = 13;
-	public static readonly INT8 = 14;
-	public static readonly INT16 = 15;
-	public static readonly INT32 = 16;
-	public static readonly INT64 = 17;
-	public static readonly FLOAT32 = 18;
-	public static readonly FLOAT64 = 19;
-	public static readonly DIGITS = 20;
-	public static readonly STRING = 21;
-	public static readonly ROOT = 22;
-	public static readonly PACKET = 23;
-	public static readonly REPEAT = 24;
-	public static readonly METADATA = 25;
-	public static readonly MATCH = 26;
-	public static readonly COLON = 27;
-	public static readonly COMMA = 28;
-	public static readonly SEMICOLON = 29;
-	public static readonly IDENTIFIER = 30;
-	public static readonly STRING_LITERAL = 31;
-	public static readonly LINE_COMMENT = 32;
-	public static readonly WS = 33;
+	public static readonly T__9 = 10;
+	public static readonly T__10 = 11;
+	public static readonly T__11 = 12;
+	public static readonly UINT8 = 13;
+	public static readonly UINT16 = 14;
+	public static readonly UINT32 = 15;
+	public static readonly UINT64 = 16;
+	public static readonly INT8 = 17;
+	public static readonly INT16 = 18;
+	public static readonly INT32 = 19;
+	public static readonly INT64 = 20;
+	public static readonly FLOAT32 = 21;
+	public static readonly FLOAT64 = 22;
+	public static readonly DIGITS = 23;
+	public static readonly STRING = 24;
+	public static readonly ROOT = 25;
+	public static readonly PACKET = 26;
+	public static readonly REPEAT = 27;
+	public static readonly METADATA = 28;
+	public static readonly MATCH = 29;
+	public static readonly COLON = 30;
+	public static readonly COMMA = 31;
+	public static readonly SEMICOLON = 32;
+	public static readonly IDENTIFIER = 33;
+	public static readonly STRING_LITERAL = 34;
+	public static readonly LINE_COMMENT = 35;
+	public static readonly WS = 36;
 	public static readonly RULE_packet = 0;
 	public static readonly RULE_optionDefinition = 1;
 	public static readonly RULE_optionDeclaration = 2;
@@ -83,17 +86,19 @@ export class PacketDslParser extends Parser {
 	];
 
 	private static readonly _LITERAL_NAMES: Array<string | undefined> = [
-		undefined, "'options'", "'{'", "'}'", "'='", "'string'", "'char'", "'char['", 
-		"']'", "'['", undefined, undefined, undefined, undefined, undefined, undefined, 
-		undefined, undefined, undefined, undefined, undefined, undefined, "'root'", 
-		"'packet'", "'repeat'", "'MetaData'", "'match'", "':'", "','", "';'",
+		undefined, "'options'", "'{'", "'}'", "'='", "'lengthof('", "')'", "'string'", 
+		"'char'", "'char['", "']'", "'as'", "'['", undefined, undefined, undefined, 
+		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
+		undefined, undefined, "'root'", "'packet'", "'repeat'", "'MetaData'", 
+		"'match'", "':'", "','", "';'",
 	];
 	private static readonly _SYMBOLIC_NAMES: Array<string | undefined> = [
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
-		undefined, undefined, undefined, "UINT8", "UINT16", "UINT32", "UINT64", 
-		"INT8", "INT16", "INT32", "INT64", "FLOAT32", "FLOAT64", "DIGITS", "STRING", 
-		"ROOT", "PACKET", "REPEAT", "METADATA", "MATCH", "COLON", "COMMA", "SEMICOLON", 
-		"IDENTIFIER", "STRING_LITERAL", "LINE_COMMENT", "WS",
+		undefined, undefined, undefined, undefined, undefined, undefined, "UINT8", 
+		"UINT16", "UINT32", "UINT64", "INT8", "INT16", "INT32", "INT64", "FLOAT32", 
+		"FLOAT64", "DIGITS", "STRING", "ROOT", "PACKET", "REPEAT", "METADATA", 
+		"MATCH", "COLON", "COMMA", "SEMICOLON", "IDENTIFIER", "STRING_LITERAL", 
+		"LINE_COMMENT", "WS",
 	];
 	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(PacketDslParser._LITERAL_NAMES, PacketDslParser._SYMBOLIC_NAMES, []);
 
@@ -291,7 +296,7 @@ export class PacketDslParser extends Parser {
 			this.state = 59;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << PacketDslParser.T__4) | (1 << PacketDslParser.T__5) | (1 << PacketDslParser.T__6) | (1 << PacketDslParser.UINT8) | (1 << PacketDslParser.UINT16) | (1 << PacketDslParser.UINT32) | (1 << PacketDslParser.UINT64) | (1 << PacketDslParser.INT8) | (1 << PacketDslParser.INT16) | (1 << PacketDslParser.INT32) | (1 << PacketDslParser.INT64) | (1 << PacketDslParser.FLOAT32) | (1 << PacketDslParser.FLOAT64) | (1 << PacketDslParser.REPEAT) | (1 << PacketDslParser.MATCH) | (1 << PacketDslParser.IDENTIFIER))) !== 0)) {
+			while (((((_la - 7)) & ~0x1F) === 0 && ((1 << (_la - 7)) & ((1 << (PacketDslParser.T__6 - 7)) | (1 << (PacketDslParser.T__7 - 7)) | (1 << (PacketDslParser.T__8 - 7)) | (1 << (PacketDslParser.UINT8 - 7)) | (1 << (PacketDslParser.UINT16 - 7)) | (1 << (PacketDslParser.UINT32 - 7)) | (1 << (PacketDslParser.UINT64 - 7)) | (1 << (PacketDslParser.INT8 - 7)) | (1 << (PacketDslParser.INT16 - 7)) | (1 << (PacketDslParser.INT32 - 7)) | (1 << (PacketDslParser.INT64 - 7)) | (1 << (PacketDslParser.FLOAT32 - 7)) | (1 << (PacketDslParser.FLOAT64 - 7)) | (1 << (PacketDslParser.REPEAT - 7)) | (1 << (PacketDslParser.MATCH - 7)) | (1 << (PacketDslParser.IDENTIFIER - 7)))) !== 0)) {
 				{
 				{
 				this.state = 56;
@@ -326,9 +331,9 @@ export class PacketDslParser extends Parser {
 		this.enterRule(_localctx, 8, PacketDslParser.RULE_fieldDefinition);
 		let _la: number;
 		try {
-			this.state = 86;
+			this.state = 82;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 12, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 9, this._ctx) ) {
 			case 1:
 				_localctx = new InerObjectFieldContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
@@ -345,16 +350,8 @@ export class PacketDslParser extends Parser {
 
 				this.state = 67;
 				this.inerObjectDeclaration();
-				this.state = 69;
-				this._errHandler.sync(this);
-				_la = this._input.LA(1);
-				if (_la === PacketDslParser.COMMA) {
-					{
-					this.state = 68;
-					this.match(PacketDslParser.COMMA);
-					}
-				}
-
+				this.state = 68;
+				this.match(PacketDslParser.COMMA);
 				}
 				break;
 
@@ -362,17 +359,17 @@ export class PacketDslParser extends Parser {
 				_localctx = new MetaFieldContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 72;
+				this.state = 71;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === PacketDslParser.REPEAT) {
 					{
-					this.state = 71;
+					this.state = 70;
 					this.match(PacketDslParser.REPEAT);
 					}
 				}
 
-				this.state = 74;
+				this.state = 73;
 				this.metaDataDeclaration();
 				}
 				break;
@@ -381,28 +378,20 @@ export class PacketDslParser extends Parser {
 				_localctx = new ObjectFieldContext(_localctx);
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 76;
+				this.state = 75;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === PacketDslParser.REPEAT) {
 					{
-					this.state = 75;
+					this.state = 74;
 					this.match(PacketDslParser.REPEAT);
 					}
 				}
 
-				this.state = 78;
+				this.state = 77;
 				this.match(PacketDslParser.IDENTIFIER);
-				this.state = 80;
-				this._errHandler.sync(this);
-				_la = this._input.LA(1);
-				if (_la === PacketDslParser.COMMA) {
-					{
-					this.state = 79;
-					this.match(PacketDslParser.COMMA);
-					}
-				}
-
+				this.state = 78;
+				this.match(PacketDslParser.COMMA);
 				}
 				break;
 
@@ -410,18 +399,10 @@ export class PacketDslParser extends Parser {
 				_localctx = new MatchFieldContext(_localctx);
 				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 82;
+				this.state = 79;
 				this.matchFieldDeclaration();
-				this.state = 84;
-				this._errHandler.sync(this);
-				_la = this._input.LA(1);
-				if (_la === PacketDslParser.COMMA) {
-					{
-					this.state = 83;
-					this.match(PacketDslParser.COMMA);
-					}
-				}
-
+				this.state = 80;
+				this.match(PacketDslParser.COMMA);
 				}
 				break;
 			}
@@ -448,27 +429,27 @@ export class PacketDslParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 88;
+			this.state = 84;
 			this.match(PacketDslParser.METADATA);
-			this.state = 89;
+			this.state = 85;
 			this.match(PacketDslParser.IDENTIFIER);
-			this.state = 90;
+			this.state = 86;
 			this.match(PacketDslParser.T__1);
-			this.state = 94;
+			this.state = 90;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << PacketDslParser.T__4) | (1 << PacketDslParser.T__5) | (1 << PacketDslParser.T__6) | (1 << PacketDslParser.UINT8) | (1 << PacketDslParser.UINT16) | (1 << PacketDslParser.UINT32) | (1 << PacketDslParser.UINT64) | (1 << PacketDslParser.INT8) | (1 << PacketDslParser.INT16) | (1 << PacketDslParser.INT32) | (1 << PacketDslParser.INT64) | (1 << PacketDslParser.FLOAT32) | (1 << PacketDslParser.FLOAT64) | (1 << PacketDslParser.IDENTIFIER))) !== 0)) {
+			while (((((_la - 7)) & ~0x1F) === 0 && ((1 << (_la - 7)) & ((1 << (PacketDslParser.T__6 - 7)) | (1 << (PacketDslParser.T__7 - 7)) | (1 << (PacketDslParser.T__8 - 7)) | (1 << (PacketDslParser.UINT8 - 7)) | (1 << (PacketDslParser.UINT16 - 7)) | (1 << (PacketDslParser.UINT32 - 7)) | (1 << (PacketDslParser.UINT64 - 7)) | (1 << (PacketDslParser.INT8 - 7)) | (1 << (PacketDslParser.INT16 - 7)) | (1 << (PacketDslParser.INT32 - 7)) | (1 << (PacketDslParser.INT64 - 7)) | (1 << (PacketDslParser.FLOAT32 - 7)) | (1 << (PacketDslParser.FLOAT64 - 7)) | (1 << (PacketDslParser.IDENTIFIER - 7)))) !== 0)) {
 				{
 				{
-				this.state = 91;
+				this.state = 87;
 				this.metaDataDeclaration();
 				}
 				}
-				this.state = 96;
+				this.state = 92;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 97;
+			this.state = 93;
 			this.match(PacketDslParser.T__2);
 			}
 		}
@@ -494,38 +475,46 @@ export class PacketDslParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 100;
+			this.state = 96;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 14, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 11, this._ctx) ) {
 			case 1:
 				{
-				this.state = 99;
+				this.state = 95;
 				this.type();
 				}
 				break;
 			}
-			this.state = 102;
-			this.match(PacketDslParser.IDENTIFIER);
-			this.state = 104;
+			this.state = 98;
+			_localctx._name = this.match(PacketDslParser.IDENTIFIER);
+			this.state = 103;
+			this._errHandler.sync(this);
+			_la = this._input.LA(1);
+			if (_la === PacketDslParser.T__3) {
+				{
+				this.state = 99;
+				this.match(PacketDslParser.T__3);
+				this.state = 100;
+				this.match(PacketDslParser.T__4);
+				this.state = 101;
+				_localctx._from = this.match(PacketDslParser.IDENTIFIER);
+				this.state = 102;
+				this.match(PacketDslParser.T__5);
+				}
+			}
+
+			this.state = 106;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === PacketDslParser.STRING_LITERAL) {
 				{
-				this.state = 103;
+				this.state = 105;
 				this.match(PacketDslParser.STRING_LITERAL);
 				}
 			}
 
-			this.state = 107;
-			this._errHandler.sync(this);
-			_la = this._input.LA(1);
-			if (_la === PacketDslParser.COMMA) {
-				{
-				this.state = 106;
-				this.match(PacketDslParser.COMMA);
-				}
-			}
-
+			this.state = 108;
+			this.match(PacketDslParser.COMMA);
 			}
 		}
 		catch (re) {
@@ -547,12 +536,12 @@ export class PacketDslParser extends Parser {
 		let _localctx: ValueContext = new ValueContext(this._ctx, this.state);
 		this.enterRule(_localctx, 14, PacketDslParser.RULE_value);
 		try {
-			this.state = 112;
+			this.state = 113;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case PacketDslParser.T__4:
-			case PacketDslParser.T__5:
 			case PacketDslParser.T__6:
+			case PacketDslParser.T__7:
+			case PacketDslParser.T__8:
 			case PacketDslParser.UINT8:
 			case PacketDslParser.UINT16:
 			case PacketDslParser.UINT32:
@@ -566,21 +555,21 @@ export class PacketDslParser extends Parser {
 			case PacketDslParser.IDENTIFIER:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 109;
+				this.state = 110;
 				this.type();
 				}
 				break;
 			case PacketDslParser.STRING:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 110;
+				this.state = 111;
 				this.match(PacketDslParser.STRING);
 				}
 				break;
 			case PacketDslParser.DIGITS:
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 111;
+				this.state = 112;
 				this.match(PacketDslParser.DIGITS);
 				}
 				break;
@@ -608,117 +597,117 @@ export class PacketDslParser extends Parser {
 		this.enterRule(_localctx, 16, PacketDslParser.RULE_type);
 		let _la: number;
 		try {
-			this.state = 132;
+			this.state = 133;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case PacketDslParser.IDENTIFIER:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 114;
+				this.state = 115;
 				this.match(PacketDslParser.IDENTIFIER);
 				}
 				break;
 			case PacketDslParser.UINT8:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 115;
+				this.state = 116;
 				this.match(PacketDslParser.UINT8);
 				}
 				break;
 			case PacketDslParser.UINT16:
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 116;
+				this.state = 117;
 				this.match(PacketDslParser.UINT16);
 				}
 				break;
 			case PacketDslParser.UINT32:
 				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 117;
+				this.state = 118;
 				this.match(PacketDslParser.UINT32);
 				}
 				break;
 			case PacketDslParser.UINT64:
 				this.enterOuterAlt(_localctx, 5);
 				{
-				this.state = 118;
+				this.state = 119;
 				this.match(PacketDslParser.UINT64);
 				}
 				break;
 			case PacketDslParser.INT8:
 				this.enterOuterAlt(_localctx, 6);
 				{
-				this.state = 119;
+				this.state = 120;
 				this.match(PacketDslParser.INT8);
 				}
 				break;
 			case PacketDslParser.INT16:
 				this.enterOuterAlt(_localctx, 7);
 				{
-				this.state = 120;
+				this.state = 121;
 				this.match(PacketDslParser.INT16);
 				}
 				break;
 			case PacketDslParser.INT32:
 				this.enterOuterAlt(_localctx, 8);
 				{
-				this.state = 121;
+				this.state = 122;
 				this.match(PacketDslParser.INT32);
 				}
 				break;
 			case PacketDslParser.INT64:
 				this.enterOuterAlt(_localctx, 9);
 				{
-				this.state = 122;
+				this.state = 123;
 				this.match(PacketDslParser.INT64);
 				}
 				break;
 			case PacketDslParser.FLOAT32:
 				this.enterOuterAlt(_localctx, 10);
 				{
-				this.state = 123;
+				this.state = 124;
 				this.match(PacketDslParser.FLOAT32);
 				}
 				break;
 			case PacketDslParser.FLOAT64:
 				this.enterOuterAlt(_localctx, 11);
 				{
-				this.state = 124;
+				this.state = 125;
 				this.match(PacketDslParser.FLOAT64);
 				}
 				break;
-			case PacketDslParser.T__4:
+			case PacketDslParser.T__6:
 				this.enterOuterAlt(_localctx, 12);
 				{
-				this.state = 125;
-				this.match(PacketDslParser.T__4);
+				this.state = 126;
+				this.match(PacketDslParser.T__6);
 				}
 				break;
-			case PacketDslParser.T__5:
+			case PacketDslParser.T__7:
 				this.enterOuterAlt(_localctx, 13);
 				{
-				this.state = 126;
-				this.match(PacketDslParser.T__5);
+				this.state = 127;
+				this.match(PacketDslParser.T__7);
 				}
 				break;
-			case PacketDslParser.T__6:
+			case PacketDslParser.T__8:
 				this.enterOuterAlt(_localctx, 14);
 				{
-				this.state = 127;
-				this.match(PacketDslParser.T__6);
-				this.state = 129;
+				this.state = 128;
+				this.match(PacketDslParser.T__8);
+				this.state = 130;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === PacketDslParser.DIGITS) {
 					{
-					this.state = 128;
+					this.state = 129;
 					this.match(PacketDslParser.DIGITS);
 					}
 				}
 
-				this.state = 131;
-				this.match(PacketDslParser.T__7);
+				this.state = 132;
+				this.match(PacketDslParser.T__9);
 				}
 				break;
 			default:
@@ -747,27 +736,31 @@ export class PacketDslParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 134;
-			this.match(PacketDslParser.MATCH);
 			this.state = 135;
-			this.match(PacketDslParser.IDENTIFIER);
+			this.match(PacketDslParser.MATCH);
 			this.state = 136;
-			this.match(PacketDslParser.T__1);
+			_localctx._matchKey = this.match(PacketDslParser.IDENTIFIER);
+			this.state = 137;
+			this.match(PacketDslParser.T__10);
 			this.state = 138;
+			_localctx._matchName = this.match(PacketDslParser.IDENTIFIER);
+			this.state = 139;
+			this.match(PacketDslParser.T__1);
+			this.state = 141;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			do {
 				{
 				{
-				this.state = 137;
+				this.state = 140;
 				this.matchPair();
 				}
 				}
-				this.state = 140;
+				this.state = 143;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-			} while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << PacketDslParser.T__8) | (1 << PacketDslParser.DIGITS) | (1 << PacketDslParser.STRING))) !== 0));
-			this.state = 142;
+			} while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << PacketDslParser.T__11) | (1 << PacketDslParser.DIGITS) | (1 << PacketDslParser.STRING))) !== 0));
+			this.state = 145;
 			this.match(PacketDslParser.T__2);
 			}
 		}
@@ -793,40 +786,40 @@ export class PacketDslParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 147;
+			this.state = 150;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case PacketDslParser.DIGITS:
 				{
-				this.state = 144;
+				this.state = 147;
 				this.match(PacketDslParser.DIGITS);
 				}
 				break;
 			case PacketDslParser.STRING:
 				{
-				this.state = 145;
+				this.state = 148;
 				this.match(PacketDslParser.STRING);
 				}
 				break;
-			case PacketDslParser.T__8:
+			case PacketDslParser.T__11:
 				{
-				this.state = 146;
+				this.state = 149;
 				this.list();
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
-			this.state = 149;
-			this.match(PacketDslParser.COLON);
-			this.state = 150;
-			this.match(PacketDslParser.IDENTIFIER);
 			this.state = 152;
+			this.match(PacketDslParser.COLON);
+			this.state = 153;
+			this.match(PacketDslParser.IDENTIFIER);
+			this.state = 155;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === PacketDslParser.COMMA) {
 				{
-				this.state = 151;
+				this.state = 154;
 				this.match(PacketDslParser.COMMA);
 				}
 			}
@@ -855,26 +848,26 @@ export class PacketDslParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 154;
+			this.state = 157;
 			this.match(PacketDslParser.IDENTIFIER);
 			{
-			this.state = 155;
+			this.state = 158;
 			this.match(PacketDslParser.T__1);
-			this.state = 157;
+			this.state = 160;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			do {
 				{
 				{
-				this.state = 156;
+				this.state = 159;
 				this.fieldDefinition();
 				}
 				}
-				this.state = 159;
+				this.state = 162;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-			} while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << PacketDslParser.T__4) | (1 << PacketDslParser.T__5) | (1 << PacketDslParser.T__6) | (1 << PacketDslParser.UINT8) | (1 << PacketDslParser.UINT16) | (1 << PacketDslParser.UINT32) | (1 << PacketDslParser.UINT64) | (1 << PacketDslParser.INT8) | (1 << PacketDslParser.INT16) | (1 << PacketDslParser.INT32) | (1 << PacketDslParser.INT64) | (1 << PacketDslParser.FLOAT32) | (1 << PacketDslParser.FLOAT64) | (1 << PacketDslParser.REPEAT) | (1 << PacketDslParser.MATCH) | (1 << PacketDslParser.IDENTIFIER))) !== 0));
-			this.state = 161;
+			} while (((((_la - 7)) & ~0x1F) === 0 && ((1 << (_la - 7)) & ((1 << (PacketDslParser.T__6 - 7)) | (1 << (PacketDslParser.T__7 - 7)) | (1 << (PacketDslParser.T__8 - 7)) | (1 << (PacketDslParser.UINT8 - 7)) | (1 << (PacketDslParser.UINT16 - 7)) | (1 << (PacketDslParser.UINT32 - 7)) | (1 << (PacketDslParser.UINT64 - 7)) | (1 << (PacketDslParser.INT8 - 7)) | (1 << (PacketDslParser.INT16 - 7)) | (1 << (PacketDslParser.INT32 - 7)) | (1 << (PacketDslParser.INT64 - 7)) | (1 << (PacketDslParser.FLOAT32 - 7)) | (1 << (PacketDslParser.FLOAT64 - 7)) | (1 << (PacketDslParser.REPEAT - 7)) | (1 << (PacketDslParser.MATCH - 7)) | (1 << (PacketDslParser.IDENTIFIER - 7)))) !== 0));
+			this.state = 164;
 			this.match(PacketDslParser.T__2);
 			}
 			}
@@ -901,9 +894,9 @@ export class PacketDslParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 163;
-			this.match(PacketDslParser.T__8);
-			this.state = 164;
+			this.state = 166;
+			this.match(PacketDslParser.T__11);
+			this.state = 167;
 			_la = this._input.LA(1);
 			if (!(_la === PacketDslParser.DIGITS || _la === PacketDslParser.STRING)) {
 			this._errHandler.recoverInline(this);
@@ -915,15 +908,15 @@ export class PacketDslParser extends Parser {
 				this._errHandler.reportMatch(this);
 				this.consume();
 			}
-			this.state = 169;
+			this.state = 172;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la === PacketDslParser.COMMA) {
 				{
 				{
-				this.state = 165;
+				this.state = 168;
 				this.match(PacketDslParser.COMMA);
-				this.state = 166;
+				this.state = 169;
 				_la = this._input.LA(1);
 				if (!(_la === PacketDslParser.DIGITS || _la === PacketDslParser.STRING)) {
 				this._errHandler.recoverInline(this);
@@ -937,12 +930,12 @@ export class PacketDslParser extends Parser {
 				}
 				}
 				}
-				this.state = 171;
+				this.state = 174;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 172;
-			this.match(PacketDslParser.T__7);
+			this.state = 175;
+			this.match(PacketDslParser.T__9);
 			}
 		}
 		catch (re) {
@@ -961,85 +954,85 @@ export class PacketDslParser extends Parser {
 	}
 
 	public static readonly _serializedATN: string =
-		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03#\xB1\x04\x02" +
+		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03&\xB4\x04\x02" +
 		"\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04\x07" +
 		"\t\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x04\v\t\v\x04\f\t\f\x04\r\t\r\x04" +
 		"\x0E\t\x0E\x03\x02\x03\x02\x03\x02\x07\x02 \n\x02\f\x02\x0E\x02#\v\x02" +
 		"\x03\x03\x03\x03\x03\x03\x07\x03(\n\x03\f\x03\x0E\x03+\v\x03\x03\x03\x03" +
 		"\x03\x03\x04\x03\x04\x03\x04\x03\x04\x05\x043\n\x04\x03\x05\x05\x056\n" +
 		"\x05\x03\x05\x03\x05\x03\x05\x03\x05\x07\x05<\n\x05\f\x05\x0E\x05?\v\x05" +
-		"\x03\x05\x03\x05\x03\x06\x05\x06D\n\x06\x03\x06\x03\x06\x05\x06H\n\x06" +
-		"\x03\x06\x05\x06K\n\x06\x03\x06\x03\x06\x05\x06O\n\x06\x03\x06\x03\x06" +
-		"\x05\x06S\n\x06\x03\x06\x03\x06\x05\x06W\n\x06\x05\x06Y\n\x06\x03\x07" +
-		"\x03\x07\x03\x07\x03\x07\x07\x07_\n\x07\f\x07\x0E\x07b\v\x07\x03\x07\x03" +
-		"\x07\x03\b\x05\bg\n\b\x03\b\x03\b\x05\bk\n\b\x03\b\x05\bn\n\b\x03\t\x03" +
-		"\t\x03\t\x05\ts\n\t\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03" +
-		"\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x05\n\x84\n\n\x03\n\x05\n\x87\n" +
-		"\n\x03\v\x03\v\x03\v\x03\v\x06\v\x8D\n\v\r\v\x0E\v\x8E\x03\v\x03\v\x03" +
-		"\f\x03\f\x03\f\x05\f\x96\n\f\x03\f\x03\f\x03\f\x05\f\x9B\n\f\x03\r\x03" +
-		"\r\x03\r\x06\r\xA0\n\r\r\r\x0E\r\xA1\x03\r\x03\r\x03\x0E\x03\x0E\x03\x0E" +
-		"\x03\x0E\x07\x0E\xAA\n\x0E\f\x0E\x0E\x0E\xAD\v\x0E\x03\x0E\x03\x0E\x03" +
-		"\x0E\x02\x02\x02\x0F\x02\x02\x04\x02\x06\x02\b\x02\n\x02\f\x02\x0E\x02" +
-		"\x10\x02\x12\x02\x14\x02\x16\x02\x18\x02\x1A\x02\x02\x03\x03\x02\x16\x17" +
-		"\x02\xCD\x02!\x03\x02\x02\x02\x04$\x03\x02\x02\x02\x06.\x03\x02\x02\x02" +
-		"\b5\x03\x02\x02\x02\nX\x03\x02\x02\x02\fZ\x03\x02\x02\x02\x0Ef\x03\x02" +
-		"\x02\x02\x10r\x03\x02\x02\x02\x12\x86\x03\x02\x02\x02\x14\x88\x03\x02" +
-		"\x02\x02\x16\x95\x03\x02\x02\x02\x18\x9C\x03\x02\x02\x02\x1A\xA5\x03\x02" +
-		"\x02\x02\x1C \x05\b\x05\x02\x1D \x05\f\x07\x02\x1E \x05\x04\x03\x02\x1F" +
-		"\x1C\x03\x02\x02\x02\x1F\x1D\x03\x02\x02\x02\x1F\x1E\x03\x02\x02\x02 " +
-		"#\x03\x02\x02\x02!\x1F\x03\x02\x02\x02!\"\x03\x02\x02\x02\"\x03\x03\x02" +
-		"\x02\x02#!\x03\x02\x02\x02$%\x07\x03\x02\x02%)\x07\x04\x02\x02&(\x05\x06" +
-		"\x04\x02\'&\x03\x02\x02\x02(+\x03\x02\x02\x02)\'\x03\x02\x02\x02)*\x03" +
-		"\x02\x02\x02*,\x03\x02\x02\x02+)\x03\x02\x02\x02,-\x07\x05\x02\x02-\x05" +
-		"\x03\x02\x02\x02./\x07 \x02\x02/0\x07\x06\x02\x0202\x05\x10\t\x0213\x07" +
-		"\x1F\x02\x0221\x03\x02\x02\x0223\x03\x02\x02\x023\x07\x03\x02\x02\x02" +
-		"46\x07\x18\x02\x0254\x03\x02\x02\x0256\x03\x02\x02\x0267\x03\x02\x02\x02" +
-		"78\x07\x19\x02\x0289\x07 \x02\x029=\x07\x04\x02\x02:<\x05\n\x06\x02;:" +
-		"\x03\x02\x02\x02<?\x03\x02\x02\x02=;\x03\x02\x02\x02=>\x03\x02\x02\x02" +
-		">@\x03\x02\x02\x02?=\x03\x02\x02\x02@A\x07\x05\x02\x02A\t\x03\x02\x02" +
-		"\x02BD\x07\x1A\x02\x02CB\x03\x02\x02\x02CD\x03\x02\x02\x02DE\x03\x02\x02" +
-		"\x02EG\x05\x18\r\x02FH\x07\x1E\x02\x02GF\x03\x02\x02\x02GH\x03\x02\x02" +
-		"\x02HY\x03\x02\x02\x02IK\x07\x1A\x02\x02JI\x03\x02\x02\x02JK\x03\x02\x02" +
-		"\x02KL\x03\x02\x02\x02LY\x05\x0E\b\x02MO\x07\x1A\x02\x02NM\x03\x02\x02" +
-		"\x02NO\x03\x02\x02\x02OP\x03\x02\x02\x02PR\x07 \x02\x02QS\x07\x1E\x02" +
-		"\x02RQ\x03\x02\x02\x02RS\x03\x02\x02\x02SY\x03\x02\x02\x02TV\x05\x14\v" +
-		"\x02UW\x07\x1E\x02\x02VU\x03\x02\x02\x02VW\x03\x02\x02\x02WY\x03\x02\x02" +
-		"\x02XC\x03\x02\x02\x02XJ\x03\x02\x02\x02XN\x03\x02\x02\x02XT\x03\x02\x02" +
-		"\x02Y\v\x03\x02\x02\x02Z[\x07\x1B\x02\x02[\\\x07 \x02\x02\\`\x07\x04\x02" +
-		"\x02]_\x05\x0E\b\x02^]\x03\x02\x02\x02_b\x03\x02\x02\x02`^\x03\x02\x02" +
-		"\x02`a\x03\x02\x02\x02ac\x03\x02\x02\x02b`\x03\x02\x02\x02cd\x07\x05\x02" +
-		"\x02d\r\x03\x02\x02\x02eg\x05\x12\n\x02fe\x03\x02\x02\x02fg\x03\x02\x02" +
-		"\x02gh\x03\x02\x02\x02hj\x07 \x02\x02ik\x07!\x02\x02ji\x03\x02\x02\x02" +
-		"jk\x03\x02\x02\x02km\x03\x02\x02\x02ln\x07\x1E\x02\x02ml\x03\x02\x02\x02" +
-		"mn\x03\x02\x02\x02n\x0F\x03\x02\x02\x02os\x05\x12\n\x02ps\x07\x17\x02" +
-		"\x02qs\x07\x16\x02\x02ro\x03\x02\x02\x02rp\x03\x02\x02\x02rq\x03\x02\x02" +
-		"\x02s\x11\x03\x02\x02\x02t\x87\x07 \x02\x02u\x87\x07\f\x02\x02v\x87\x07" +
-		"\r\x02\x02w\x87\x07\x0E\x02\x02x\x87\x07\x0F\x02\x02y\x87\x07\x10\x02" +
-		"\x02z\x87\x07\x11\x02\x02{\x87\x07\x12\x02\x02|\x87\x07\x13\x02\x02}\x87" +
-		"\x07\x14\x02\x02~\x87\x07\x15\x02\x02\x7F\x87\x07\x07\x02\x02\x80\x87" +
-		"\x07\b\x02\x02\x81\x83\x07\t\x02\x02\x82\x84\x07\x16\x02\x02\x83\x82\x03" +
-		"\x02\x02\x02\x83\x84\x03\x02\x02\x02\x84\x85\x03\x02\x02\x02\x85\x87\x07" +
-		"\n\x02\x02\x86t\x03\x02\x02\x02\x86u\x03\x02\x02\x02\x86v\x03\x02\x02" +
-		"\x02\x86w\x03\x02\x02\x02\x86x\x03\x02\x02\x02\x86y\x03\x02\x02\x02\x86" +
-		"z\x03\x02\x02\x02\x86{\x03\x02\x02\x02\x86|\x03\x02\x02\x02\x86}\x03\x02" +
-		"\x02\x02\x86~\x03\x02\x02\x02\x86\x7F\x03\x02\x02\x02\x86\x80\x03\x02" +
-		"\x02\x02\x86\x81\x03\x02\x02\x02\x87\x13\x03\x02\x02\x02\x88\x89\x07\x1C" +
-		"\x02\x02\x89\x8A\x07 \x02\x02\x8A\x8C\x07\x04\x02\x02\x8B\x8D\x05\x16" +
-		"\f\x02\x8C\x8B\x03\x02\x02\x02\x8D\x8E\x03\x02\x02\x02\x8E\x8C\x03\x02" +
-		"\x02\x02\x8E\x8F\x03\x02\x02\x02\x8F\x90\x03\x02\x02\x02\x90\x91\x07\x05" +
-		"\x02\x02\x91\x15\x03\x02\x02\x02\x92\x96\x07\x16\x02\x02\x93\x96\x07\x17" +
-		"\x02\x02\x94\x96\x05\x1A\x0E\x02\x95\x92\x03\x02\x02\x02\x95\x93\x03\x02" +
-		"\x02\x02\x95\x94\x03\x02\x02\x02\x96\x97\x03\x02\x02\x02\x97\x98\x07\x1D" +
-		"\x02\x02\x98\x9A\x07 \x02\x02\x99\x9B\x07\x1E\x02\x02\x9A\x99\x03\x02" +
-		"\x02\x02\x9A\x9B\x03\x02\x02\x02\x9B\x17\x03\x02\x02\x02\x9C\x9D\x07 " +
-		"\x02\x02\x9D\x9F\x07\x04\x02\x02\x9E\xA0\x05\n\x06\x02\x9F\x9E\x03\x02" +
-		"\x02\x02\xA0\xA1\x03\x02\x02\x02\xA1\x9F\x03\x02\x02\x02\xA1\xA2\x03\x02" +
-		"\x02\x02\xA2\xA3\x03\x02\x02\x02\xA3\xA4\x07\x05\x02\x02\xA4\x19\x03\x02" +
-		"\x02\x02\xA5\xA6\x07\v\x02\x02\xA6\xAB\t\x02\x02\x02\xA7\xA8\x07\x1E\x02" +
-		"\x02\xA8\xAA\t\x02\x02\x02\xA9\xA7\x03\x02\x02\x02\xAA\xAD\x03\x02\x02" +
-		"\x02\xAB\xA9\x03\x02\x02\x02\xAB\xAC\x03\x02\x02\x02\xAC\xAE\x03\x02\x02" +
-		"\x02\xAD\xAB\x03\x02\x02\x02\xAE\xAF\x07\n\x02\x02\xAF\x1B\x03\x02\x02" +
-		"\x02\x1B\x1F!)25=CGJNRVX`fjmr\x83\x86\x8E\x95\x9A\xA1\xAB";
+		"\x03\x05\x03\x05\x03\x06\x05\x06D\n\x06\x03\x06\x03\x06\x03\x06\x03\x06" +
+		"\x05\x06J\n\x06\x03\x06\x03\x06\x05\x06N\n\x06\x03\x06\x03\x06\x03\x06" +
+		"\x03\x06\x03\x06\x05\x06U\n\x06\x03\x07\x03\x07\x03\x07\x03\x07\x07\x07" +
+		"[\n\x07\f\x07\x0E\x07^\v\x07\x03\x07\x03\x07\x03\b\x05\bc\n\b\x03\b\x03" +
+		"\b\x03\b\x03\b\x03\b\x05\bj\n\b\x03\b\x05\bm\n\b\x03\b\x03\b\x03\t\x03" +
+		"\t\x03\t\x05\tt\n\t\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03" +
+		"\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x05\n\x85\n\n\x03\n\x05\n\x88\n" +
+		"\n\x03\v\x03\v\x03\v\x03\v\x03\v\x03\v\x06\v\x90\n\v\r\v\x0E\v\x91\x03" +
+		"\v\x03\v\x03\f\x03\f\x03\f\x05\f\x99\n\f\x03\f\x03\f\x03\f\x05\f\x9E\n" +
+		"\f\x03\r\x03\r\x03\r\x06\r\xA3\n\r\r\r\x0E\r\xA4\x03\r\x03\r\x03\x0E\x03" +
+		"\x0E\x03\x0E\x03\x0E\x07\x0E\xAD\n\x0E\f\x0E\x0E\x0E\xB0\v\x0E\x03\x0E" +
+		"\x03\x0E\x03\x0E\x02\x02\x02\x0F\x02\x02\x04\x02\x06\x02\b\x02\n\x02\f" +
+		"\x02\x0E\x02\x10\x02\x12\x02\x14\x02\x16\x02\x18\x02\x1A\x02\x02\x03\x03" +
+		"\x02\x19\x1A\x02\xCD\x02!\x03\x02\x02\x02\x04$\x03\x02\x02\x02\x06.\x03" +
+		"\x02\x02\x02\b5\x03\x02\x02\x02\nT\x03\x02\x02\x02\fV\x03\x02\x02\x02" +
+		"\x0Eb\x03\x02\x02\x02\x10s\x03\x02\x02\x02\x12\x87\x03\x02\x02\x02\x14" +
+		"\x89\x03\x02\x02\x02\x16\x98\x03\x02\x02\x02\x18\x9F\x03\x02\x02\x02\x1A" +
+		"\xA8\x03\x02\x02\x02\x1C \x05\b\x05\x02\x1D \x05\f\x07\x02\x1E \x05\x04" +
+		"\x03\x02\x1F\x1C\x03\x02\x02\x02\x1F\x1D\x03\x02\x02\x02\x1F\x1E\x03\x02" +
+		"\x02\x02 #\x03\x02\x02\x02!\x1F\x03\x02\x02\x02!\"\x03\x02\x02\x02\"\x03" +
+		"\x03\x02\x02\x02#!\x03\x02\x02\x02$%\x07\x03\x02\x02%)\x07\x04\x02\x02" +
+		"&(\x05\x06\x04\x02\'&\x03\x02\x02\x02(+\x03\x02\x02\x02)\'\x03\x02\x02" +
+		"\x02)*\x03\x02\x02\x02*,\x03\x02\x02\x02+)\x03\x02\x02\x02,-\x07\x05\x02" +
+		"\x02-\x05\x03\x02\x02\x02./\x07#\x02\x02/0\x07\x06\x02\x0202\x05\x10\t" +
+		"\x0213\x07\"\x02\x0221\x03\x02\x02\x0223\x03\x02\x02\x023\x07\x03\x02" +
+		"\x02\x0246\x07\x1B\x02\x0254\x03\x02\x02\x0256\x03\x02\x02\x0267\x03\x02" +
+		"\x02\x0278\x07\x1C\x02\x0289\x07#\x02\x029=\x07\x04\x02\x02:<\x05\n\x06" +
+		"\x02;:\x03\x02\x02\x02<?\x03\x02\x02\x02=;\x03\x02\x02\x02=>\x03\x02\x02" +
+		"\x02>@\x03\x02\x02\x02?=\x03\x02\x02\x02@A\x07\x05\x02\x02A\t\x03\x02" +
+		"\x02\x02BD\x07\x1D\x02\x02CB\x03\x02\x02\x02CD\x03\x02\x02\x02DE\x03\x02" +
+		"\x02\x02EF\x05\x18\r\x02FG\x07!\x02\x02GU\x03\x02\x02\x02HJ\x07\x1D\x02" +
+		"\x02IH\x03\x02\x02\x02IJ\x03\x02\x02\x02JK\x03\x02\x02\x02KU\x05\x0E\b" +
+		"\x02LN\x07\x1D\x02\x02ML\x03\x02\x02\x02MN\x03\x02\x02\x02NO\x03\x02\x02" +
+		"\x02OP\x07#\x02\x02PU\x07!\x02\x02QR\x05\x14\v\x02RS\x07!\x02\x02SU\x03" +
+		"\x02\x02\x02TC\x03\x02\x02\x02TI\x03\x02\x02\x02TM\x03\x02\x02\x02TQ\x03" +
+		"\x02\x02\x02U\v\x03\x02\x02\x02VW\x07\x1E\x02\x02WX\x07#\x02\x02X\\\x07" +
+		"\x04\x02\x02Y[\x05\x0E\b\x02ZY\x03\x02\x02\x02[^\x03\x02\x02\x02\\Z\x03" +
+		"\x02\x02\x02\\]\x03\x02\x02\x02]_\x03\x02\x02\x02^\\\x03\x02\x02\x02_" +
+		"`\x07\x05\x02\x02`\r\x03\x02\x02\x02ac\x05\x12\n\x02ba\x03\x02\x02\x02" +
+		"bc\x03\x02\x02\x02cd\x03\x02\x02\x02di\x07#\x02\x02ef\x07\x06\x02\x02" +
+		"fg\x07\x07\x02\x02gh\x07#\x02\x02hj\x07\b\x02\x02ie\x03\x02\x02\x02ij" +
+		"\x03\x02\x02\x02jl\x03\x02\x02\x02km\x07$\x02\x02lk\x03\x02\x02\x02lm" +
+		"\x03\x02\x02\x02mn\x03\x02\x02\x02no\x07!\x02\x02o\x0F\x03\x02\x02\x02" +
+		"pt\x05\x12\n\x02qt\x07\x1A\x02\x02rt\x07\x19\x02\x02sp\x03\x02\x02\x02" +
+		"sq\x03\x02\x02\x02sr\x03\x02\x02\x02t\x11\x03\x02\x02\x02u\x88\x07#\x02" +
+		"\x02v\x88\x07\x0F\x02\x02w\x88\x07\x10\x02\x02x\x88\x07\x11\x02\x02y\x88" +
+		"\x07\x12\x02\x02z\x88\x07\x13\x02\x02{\x88\x07\x14\x02\x02|\x88\x07\x15" +
+		"\x02\x02}\x88\x07\x16\x02\x02~\x88\x07\x17\x02\x02\x7F\x88\x07\x18\x02" +
+		"\x02\x80\x88\x07\t\x02\x02\x81\x88\x07\n\x02\x02\x82\x84\x07\v\x02\x02" +
+		"\x83\x85\x07\x19\x02\x02\x84\x83\x03\x02\x02\x02\x84\x85\x03\x02\x02\x02" +
+		"\x85\x86\x03\x02\x02\x02\x86\x88\x07\f\x02\x02\x87u\x03\x02\x02\x02\x87" +
+		"v\x03\x02\x02\x02\x87w\x03\x02\x02\x02\x87x\x03\x02\x02\x02\x87y\x03\x02" +
+		"\x02\x02\x87z\x03\x02\x02\x02\x87{\x03\x02\x02\x02\x87|\x03\x02\x02\x02" +
+		"\x87}\x03\x02\x02\x02\x87~\x03\x02\x02\x02\x87\x7F\x03\x02\x02\x02\x87" +
+		"\x80\x03\x02\x02\x02\x87\x81\x03\x02\x02\x02\x87\x82\x03\x02\x02\x02\x88" +
+		"\x13\x03\x02\x02\x02\x89\x8A\x07\x1F\x02\x02\x8A\x8B\x07#\x02\x02\x8B" +
+		"\x8C\x07\r\x02\x02\x8C\x8D\x07#\x02\x02\x8D\x8F\x07\x04\x02\x02\x8E\x90" +
+		"\x05\x16\f\x02\x8F\x8E\x03\x02\x02\x02\x90\x91\x03\x02\x02\x02\x91\x8F" +
+		"\x03\x02\x02\x02\x91\x92\x03\x02\x02\x02\x92\x93\x03\x02\x02\x02\x93\x94" +
+		"\x07\x05\x02\x02\x94\x15\x03\x02\x02\x02\x95\x99\x07\x19\x02\x02\x96\x99" +
+		"\x07\x1A\x02\x02\x97\x99\x05\x1A\x0E\x02\x98\x95\x03\x02\x02\x02\x98\x96" +
+		"\x03\x02\x02\x02\x98\x97\x03\x02\x02\x02\x99\x9A\x03\x02\x02\x02\x9A\x9B" +
+		"\x07 \x02\x02\x9B\x9D\x07#\x02\x02\x9C\x9E\x07!\x02\x02\x9D\x9C\x03\x02" +
+		"\x02\x02\x9D\x9E\x03\x02\x02\x02\x9E\x17\x03\x02\x02\x02\x9F\xA0\x07#" +
+		"\x02\x02\xA0\xA2\x07\x04\x02\x02\xA1\xA3\x05\n\x06\x02\xA2\xA1\x03\x02" +
+		"\x02\x02\xA3\xA4\x03\x02\x02\x02\xA4\xA2\x03\x02\x02\x02\xA4\xA5\x03\x02" +
+		"\x02\x02\xA5\xA6\x03\x02\x02\x02\xA6\xA7\x07\x05\x02\x02\xA7\x19\x03\x02" +
+		"\x02\x02\xA8\xA9\x07\x0E\x02\x02\xA9\xAE\t\x02\x02\x02\xAA\xAB\x07!\x02" +
+		"\x02\xAB\xAD\t\x02\x02\x02\xAC\xAA\x03\x02\x02\x02\xAD\xB0\x03\x02\x02" +
+		"\x02\xAE\xAC\x03\x02\x02\x02\xAE\xAF\x03\x02\x02\x02\xAF\xB1\x03\x02\x02" +
+		"\x02\xB0\xAE\x03\x02\x02\x02\xB1\xB2\x07\f\x02\x02\xB2\x1B\x03\x02\x02" +
+		"\x02\x18\x1F!)25=CIMT\\bils\x84\x87\x91\x98\x9D\xA4\xAE";
 	public static __ATN: ATN;
 	public static get _ATN(): ATN {
 		if (!PacketDslParser.__ATN) {
@@ -1234,8 +1227,8 @@ export class InerObjectFieldContext extends FieldDefinitionContext {
 	public inerObjectDeclaration(): InerObjectDeclarationContext {
 		return this.getRuleContext(0, InerObjectDeclarationContext);
 	}
+	public COMMA(): TerminalNode { return this.getToken(PacketDslParser.COMMA, 0); }
 	public REPEAT(): TerminalNode | undefined { return this.tryGetToken(PacketDslParser.REPEAT, 0); }
-	public COMMA(): TerminalNode | undefined { return this.tryGetToken(PacketDslParser.COMMA, 0); }
 	constructor(ctx: FieldDefinitionContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
@@ -1293,8 +1286,8 @@ export class MetaFieldContext extends FieldDefinitionContext {
 }
 export class ObjectFieldContext extends FieldDefinitionContext {
 	public IDENTIFIER(): TerminalNode { return this.getToken(PacketDslParser.IDENTIFIER, 0); }
+	public COMMA(): TerminalNode { return this.getToken(PacketDslParser.COMMA, 0); }
 	public REPEAT(): TerminalNode | undefined { return this.tryGetToken(PacketDslParser.REPEAT, 0); }
-	public COMMA(): TerminalNode | undefined { return this.tryGetToken(PacketDslParser.COMMA, 0); }
 	constructor(ctx: FieldDefinitionContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
@@ -1324,7 +1317,7 @@ export class MatchFieldContext extends FieldDefinitionContext {
 	public matchFieldDeclaration(): MatchFieldDeclarationContext {
 		return this.getRuleContext(0, MatchFieldDeclarationContext);
 	}
-	public COMMA(): TerminalNode | undefined { return this.tryGetToken(PacketDslParser.COMMA, 0); }
+	public COMMA(): TerminalNode { return this.getToken(PacketDslParser.COMMA, 0); }
 	constructor(ctx: FieldDefinitionContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
@@ -1393,12 +1386,22 @@ export class MetaDataDefinitionContext extends ParserRuleContext {
 
 
 export class MetaDataDeclarationContext extends ParserRuleContext {
-	public IDENTIFIER(): TerminalNode { return this.getToken(PacketDslParser.IDENTIFIER, 0); }
+	public _name!: Token;
+	public _from!: Token;
+	public COMMA(): TerminalNode { return this.getToken(PacketDslParser.COMMA, 0); }
+	public IDENTIFIER(): TerminalNode[];
+	public IDENTIFIER(i: number): TerminalNode;
+	public IDENTIFIER(i?: number): TerminalNode | TerminalNode[] {
+		if (i === undefined) {
+			return this.getTokens(PacketDslParser.IDENTIFIER);
+		} else {
+			return this.getToken(PacketDslParser.IDENTIFIER, i);
+		}
+	}
 	public type(): TypeContext | undefined {
 		return this.tryGetRuleContext(0, TypeContext);
 	}
 	public STRING_LITERAL(): TerminalNode | undefined { return this.tryGetToken(PacketDslParser.STRING_LITERAL, 0); }
-	public COMMA(): TerminalNode | undefined { return this.tryGetToken(PacketDslParser.COMMA, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
@@ -1503,8 +1506,18 @@ export class TypeContext extends ParserRuleContext {
 
 
 export class MatchFieldDeclarationContext extends ParserRuleContext {
+	public _matchKey!: Token;
+	public _matchName!: Token;
 	public MATCH(): TerminalNode { return this.getToken(PacketDslParser.MATCH, 0); }
-	public IDENTIFIER(): TerminalNode { return this.getToken(PacketDslParser.IDENTIFIER, 0); }
+	public IDENTIFIER(): TerminalNode[];
+	public IDENTIFIER(i: number): TerminalNode;
+	public IDENTIFIER(i?: number): TerminalNode | TerminalNode[] {
+		if (i === undefined) {
+			return this.getTokens(PacketDslParser.IDENTIFIER);
+		} else {
+			return this.getToken(PacketDslParser.IDENTIFIER, i);
+		}
+	}
 	public matchPair(): MatchPairContext[];
 	public matchPair(i: number): MatchPairContext;
 	public matchPair(i?: number): MatchPairContext | MatchPairContext[] {
