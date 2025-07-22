@@ -267,6 +267,14 @@ export function formatDsl(dsl: string): string {
   const lexer = new PacketDslLexer(inputStream);
   const tokenStream = new CommonTokenStream(lexer);
   const parser = new PacketDslParser(tokenStream);
+   // Add error listener to collect syntax errors
+  const syntaxErrors: string[] = [];
+  parser.removeErrorListeners(); // Remove default console error listener
+  parser.addErrorListener({
+    syntaxError: (recognizer, offendingSymbol, line, charPositionInLine, msg, e) => {
+      syntaxErrors.push(`Line ${line}:${charPositionInLine} ${msg}`);
+    },
+  });
   const tree = parser.packet();
   const formatter = new PacketDslFormattor(tokenStream);
   return formatter.visitPacket(tree);
