@@ -1,9 +1,10 @@
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import { PacketDslVisitor } from './antlr4/PacketDslVisitor';
-import { ANTLRErrorListener, CharStreams, CommonTokenStream, Token } from 'antlr4ts';
+import { CharStreams, CommonTokenStream, Token } from 'antlr4ts';
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode';
 import { PacketDslLexer } from './antlr4/PacketDslLexer';
 import { InerObjectFieldContext, MatchFieldContext, MatchFieldDeclarationContext, MetaDataDeclarationContext, MetaDataDefinitionContext, MetaFieldContext, ObjectFieldContext, OptionDeclarationContext, OptionDefinitionContext, PacketContext, PacketDefinitionContext, PacketDslParser } from './antlr4/PacketDslParser';
+import { SyntaxErrorCollector } from './model';
 
 export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
   implements PacketDslVisitor<string> {
@@ -263,20 +264,7 @@ function addIdent(value : string, count: number): string {
   return value.split("\n").map(line=>ident+line).join("\n");
 }
 
-class SyntaxErrorCollector implements ANTLRErrorListener<Token> {
-  public errors: string[] = [];
 
-  syntaxError(
-    _recognizer: any,
-    _offendingSymbol: Token | undefined,
-    line: number,
-    charPositionInLine: number,
-    msg: string,
-    _e: any
-  ): void {
-    this.errors.push(`Line ${line}:${charPositionInLine} ${msg}`);
-  }
-}
 
 
 export function formatDsl(dsl: string): string {
