@@ -41,11 +41,11 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 	const diagnosticCollection = vscode.languages.createDiagnosticCollection("fin-proto");
 	context.subscriptions.push(diagnosticCollection);
-	
-	context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(e=>{
+
+	context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(e => {
 		parseDsl(e.document, diagnosticCollection);
 	}));
-	context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(document=>{
+	context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(document => {
 		parseDsl(document, diagnosticCollection);
 	}));
 	//iterate all dsl file
@@ -60,23 +60,23 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }
 
 // parse dsl and check
 function parseDsl(document: vscode.TextDocument, diagnosticCollection: vscode.DiagnosticCollection) {
 	console.log(document.languageId);
-	if(document.languageId !== "packetdsl"){
+	if (document.languageId !== "packetdsl") {
 		return;
 	}
 	diagnosticCollection.delete(document.uri);
 	let binModel = parsePacketDsl(document.getText());
-	let diagnostics : vscode.Diagnostic[] = [];
-	binModel.syntaxErrors.forEach(error=>{
+	let diagnostics: vscode.Diagnostic[] = [];
+	binModel.syntaxErrors.forEach(error => {
 		diagnostics.push(new vscode.Diagnostic(
 			new vscode.Range(
-				new vscode.Position(error.line-1, error.start),
-				new vscode.Position(error.line-1, error.end)
-	),error.msg));
+				new vscode.Position(error.line - 1, error.start),
+				new vscode.Position(error.line - 1, error.end)
+			), error.msg));
 	});
 	diagnosticCollection.set(document.uri, diagnostics);
 }

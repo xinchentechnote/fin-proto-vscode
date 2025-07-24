@@ -26,8 +26,7 @@ import { BinaryModel, Field, MatchPair, MetaData, Packet, SyntaxErrorCollector }
 
 export class PacketDslModelParser
   extends AbstractParseTreeVisitor<any>
-  implements PacketDslVisitor<any>
-{
+  implements PacketDslVisitor<any> {
   private model = new BinaryModel();
 
   public getModel(): BinaryModel {
@@ -82,7 +81,7 @@ export class PacketDslModelParser
       const name = ctx.IDENTIFIER().text;
       const isRepeat = !!ctx.REPEAT();
       const type = this.model.getMetaDataType(name) || name;
-      return new Field(name, type,undefined, isRepeat);
+      return new Field(name, type, undefined, isRepeat);
     }
 
     if (ctx instanceof InerObjectFieldContext) {
@@ -135,7 +134,7 @@ export class PacketDslModelParser
       pairs.push(...this.visitMatchPair(pair));
     }
 
-    return new Field(name, 'match',undefined, false, undefined, '', name, pairs);
+    return new Field(name, 'match', undefined, false, undefined, '', name, pairs);
   }
 
   visitMatchPair(ctx: MatchPairContext): MatchPair[] {
@@ -160,7 +159,7 @@ export class PacketDslModelParser
 
   visitMetaDataDefinition(ctx: MetaDataDefinitionContext): void {
     for (const dec of ctx.metaDataDeclaration()) {
-      const name = dec._name.text??"";
+      const name = dec._name.text ?? "";
       const type = dec.type()?.text || name;
       const basicType = type;
       const description = dec.STRING_LITERAL()?.text || '';
@@ -184,7 +183,7 @@ export function parsePacketDsl(text: string): BinaryModel {
   const tree = parser.packet();
   const visitor = new PacketDslModelParser();
   let binModel = tree.accept(visitor);
-  if( listener.errors.length>0){
+  if (listener.errors.length > 0) {
     (binModel as BinaryModel).syntaxErrors = listener.errors;
   }
   return binModel;
