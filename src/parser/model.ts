@@ -2,11 +2,11 @@ import { ANTLRErrorListener, Token } from "antlr4ts";
 
 export class DslSyntaxError {
   constructor(
-  public line:number,
-  public start:number,
-  public end:number,
-  public msg:string,
-  ){}
+    public line: number,
+    public start: number,
+    public end: number,
+    public msg: string,
+  ) { }
 }
 
 export class SyntaxErrorCollector implements ANTLRErrorListener<Token> {
@@ -20,7 +20,7 @@ export class SyntaxErrorCollector implements ANTLRErrorListener<Token> {
     msg: string,
     _e: any
   ): void {
-    this.errors.push(new DslSyntaxError(line,charPositionInLine, charPositionInLine + 1,msg));
+    this.errors.push(new DslSyntaxError(line, charPositionInLine, charPositionInLine + 1, msg));
   }
 }
 
@@ -57,7 +57,7 @@ export class MetaData {
     public type: string,
     public basicType: string,
     public description: string
-  ) {}
+  ) { }
 }
 
 export class Packet {
@@ -66,7 +66,7 @@ export class Packet {
     public isRoot: boolean,
     public fields: Field[],
     public matchFields: Record<string, MatchPair[]> = {}
-  ) {}
+  ) { }
 }
 
 export class Field {
@@ -79,9 +79,9 @@ export class Field {
     public doc: string = "",
     public matchType?: string,
     public matchPairs: MatchPair[] = []
-  ) {}
+  ) { }
 }
 
 export class MatchPair {
-  constructor(public key: string, public value: string) {}
+  constructor(public key: string, public value: string) { }
 }
