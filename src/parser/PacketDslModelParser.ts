@@ -46,7 +46,7 @@ export class PacketDslModelParser
       for (const opt of optDef.optionDeclaration()) {
         const name = opt.IDENTIFIER().text;
         const value = opt.value().text;
-        this.model.addOption(name, value);
+        this.model.addOption(name, value, opt.start.line, opt.start.startIndex, opt.start.stopIndex);
       }
     }
 
@@ -70,8 +70,8 @@ export class PacketDslModelParser
         matchFields[field.name] = field.matchPairs;
       }
     }
-
-    const pkt = new Packet(name, isRoot, fields, matchFields);
+    let nameToken = ctx.IDENTIFIER().symbol;
+    const pkt = new Packet(name, isRoot, fields, matchFields, nameToken.line, nameToken.charPositionInLine, nameToken.charPositionInLine + name.length);
     this.model.addPacket(pkt);
     return this.model;
   }
@@ -163,7 +163,8 @@ export class PacketDslModelParser
       const type = dec.type()?.text || name;
       const basicType = type;
       const description = dec.STRING_LITERAL()?.text || '';
-      this.model.addMetaData(new MetaData(name, type, basicType, description.slice(1, -1)));
+      const metadata = new MetaData(name, type, basicType, description.slice(1, -1));
+      this.model.addMetaData(metadata);
     }
   }
 
