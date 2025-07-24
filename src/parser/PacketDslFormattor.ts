@@ -1,6 +1,6 @@
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import { PacketDslVisitor } from './antlr4/PacketDslVisitor';
-import { CharStreams, CommonTokenStream, Token } from 'antlr4ts';
+import { ANTLRErrorListener, CharStreams, CommonTokenStream, Token } from 'antlr4ts';
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode';
 import { PacketDslLexer } from './antlr4/PacketDslLexer';
 import { InerObjectFieldContext, MatchFieldContext, MatchFieldDeclarationContext, MetaDataDeclarationContext, MetaDataDefinitionContext, MetaFieldContext, ObjectFieldContext, OptionDeclarationContext, OptionDefinitionContext, PacketContext, PacketDefinitionContext, PacketDslParser } from './antlr4/PacketDslParser';
@@ -22,32 +22,35 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
   private getHiddenLeft(token: Token|undefined): string {
     const hidden = this.tokenStream.getHiddenTokensToLeft(token!.tokenIndex);
     if (!hidden) {return '';}
-    return hidden
+    let comment = hidden
       .filter(t => t.type === PacketDslParser.LINE_COMMENT && !this.lineComments.has(t))
       .map(t => {
         this.lineComments.add(t);
         return t.text;
       }).join('\n');
+      if(comment){
+        comment += "\n";
+      }
+    return comment;
   }
 
-  private getHiddenRight(token: Token|undefined): string {
+  private getHiddenRightAtSameLine(token: Token|undefined): string {
     const hidden = this.tokenStream.getHiddenTokensToRight(token!.tokenIndex);
     if (!hidden) {return '';}
     return hidden
       .filter(t => t.type === PacketDslParser.LINE_COMMENT && !this.lineComments.has(t))
       .map(t => {
-        this.lineComments.add(t);
-        if(token?.line !== t?.line){
-          return '\n' + t.text;
+        if(token?.line === t?.line){
+          // only get right comment when it is in the same line
+          this.lineComments.add(t);
+          return t.text;
         }
-        return t.text;
+        return "";
       }).join('');
   }
 
   visitPacket(ctx: PacketContext): string {
     const lines: string[] = [];
-    lines.push(this.getHiddenLeft(ctx.start));
-
     for (const child of ctx.children ?? []) {
       lines.push('\n');
       lines.push('\n');
@@ -62,7 +65,7 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
       }
     }
 
-    lines.push(this.getHiddenRight(ctx.stop));
+    lines.push(this.getHiddenRightAtSameLine(ctx.stop));
     return lines.join('').trim();
   }
 
@@ -86,7 +89,7 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
       }
     }
     lines.push('}');
-    lines.push(this.getHiddenRight(ctx.stop));
+    lines.push(this.getHiddenRightAtSameLine(ctx.stop));
     return lines.join('');
   }
 
@@ -99,7 +102,7 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
         {lines.push(`    ${this.visitOptionDeclaration(decl)}\n`);}
     }
     lines.push('}');
-    lines.push(this.getHiddenRight(ctx.stop));
+    lines.push(this.getHiddenRightAtSameLine(ctx.stop));
     return lines.join('');
   }
 
@@ -119,7 +122,7 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
         {lines.push('    ' + this.visitMetaDataDeclaration(decl) + '\n');}
     }
     lines.push('}');
-    lines.push(this.getHiddenRight(ctx.stop));
+    lines.push(this.getHiddenRightAtSameLine(ctx.stop));
     return lines.join('');
   }
 
@@ -130,15 +133,13 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
     }
     formatted += ctx._name.text;
     if (ctx._from) {
-      formatted += ` lengthof(${ctx._from.text})`;
+      formatted += ` = lengthof(${ctx._from.text})`;
     }
     if(ctx.STRING_LITERAL()){
       formatted += ' ' + ctx.STRING_LITERAL()?.text;
     }  
-    if(ctx.COMMA()){
-      formatted += ctx.COMMA()?.text;
-    }
-    const lineComment = this.getHiddenRight(ctx.stop);
+    formatted += ',';
+    const lineComment = this.getHiddenRightAtSameLine(ctx.stop);
     return `${formatted}${lineComment ? lineComment : ''}`;
   }
 
@@ -150,7 +151,7 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
       repeat = 'repeat ';
     }
     lines.push(repeat + this.visitMetaDataDeclaration(ctx.metaDataDeclaration()));
-    lines.push(this.getHiddenRight(ctx.stop));
+    lines.push(this.getHiddenRightAtSameLine(ctx.stop));
     return lines.join('');
   }
 
@@ -162,7 +163,7 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
       repeat = 'repeat ';
     }
     lines.push(repeat + ctx.IDENTIFIER().text + (ctx.COMMA()?.text ?? ''));
-    lines.push(this.getHiddenRight(ctx.stop));
+    lines.push(this.getHiddenRightAtSameLine(ctx.stop));
     return lines.join('');
   }
 
@@ -174,14 +175,14 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
     for (const fd of ctx.inerObjectDeclaration().fieldDefinition() ?? []) {
       lines.push(addIdent4ln(this.visit(fd)));
     }
-    lines.push('}');
-    lines.push(this.getHiddenRight(ctx.stop));
+    lines.push('},');
+    lines.push(this.getHiddenRightAtSameLine(ctx.stop));
     return lines.join('');
   }
 
 
   visitMatchField(ctx: MatchFieldContext): string {
-    return this.visitMatchFieldDeclaration(ctx.matchFieldDeclaration()) + (ctx.COMMA() ? ',' : '');
+    return this.visitMatchFieldDeclaration(ctx.matchFieldDeclaration()) + ",";
   }
 
   visitMatchFieldDeclaration(ctx: MatchFieldDeclarationContext): string {
@@ -209,11 +210,11 @@ export class PacketDslFormattor   extends AbstractParseTreeVisitor<string>
       pair.STRING()?.text ?? pair.DIGITS()?.text ?? '';
       const value = pair.IDENTIFIER()?.text ?? '';
       lines.push(addIdent4ln(`${key} : ${value}${pair.COMMA() ? ',' : ''}`));
-      const rightHidden = this.getHiddenRight(pair.stop).trim();
+      const rightHidden = this.getHiddenRightAtSameLine(pair.stop).trim();
       if (rightHidden) {lines.push(addIdent4ln(rightHidden));}
     }
     lines.push('}');
-    lines.push(this.getHiddenRight(ctx.stop));
+    lines.push(this.getHiddenRightAtSameLine(ctx.stop));
     return lines.join('');
   }
 
@@ -262,20 +263,36 @@ function addIdent(value : string, count: number): string {
   return value.split("\n").map(line=>ident+line).join("\n");
 }
 
+class SyntaxErrorCollector implements ANTLRErrorListener<Token> {
+  public errors: string[] = [];
+
+  syntaxError(
+    _recognizer: any,
+    _offendingSymbol: Token | undefined,
+    line: number,
+    charPositionInLine: number,
+    msg: string,
+    _e: any
+  ): void {
+    this.errors.push(`Line ${line}:${charPositionInLine} ${msg}`);
+  }
+}
+
+
 export function formatDsl(dsl: string): string {
   const inputStream = CharStreams.fromString(dsl);
   const lexer = new PacketDslLexer(inputStream);
   const tokenStream = new CommonTokenStream(lexer);
   const parser = new PacketDslParser(tokenStream);
-   // Add error listener to collect syntax errors
-  const syntaxErrors: string[] = [];
-  parser.removeErrorListeners(); // Remove default console error listener
-  parser.addErrorListener({
-    syntaxError: (recognizer, offendingSymbol, line, charPositionInLine, msg, e) => {
-      syntaxErrors.push(`Line ${line}:${charPositionInLine} ${msg}`);
-    },
-  });
+  parser.removeErrorListeners();
+  let collector = new SyntaxErrorCollector();
+  parser.addErrorListener(collector);
   const tree = parser.packet();
+  if (collector.errors.length > 0) {
+    // return origin dsl when syntax error
+    console.info("DSL Syntax Errors:\n" + collector.errors.join("\n"));
+    return dsl;
+  }
   const formatter = new PacketDslFormattor(tokenStream);
   return formatter.visitPacket(tree);
 }

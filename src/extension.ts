@@ -24,7 +24,9 @@ export function activate(context: vscode.ExtensionContext) {
 		try {
 			formattedText = formatDsl(originalText);
 		} catch (err) {
-			vscode.window.showErrorMessage(`格式化失败: ${(err as Error).message}`);
+			const error = err as Error;
+			vscode.window.showErrorMessage(`格式化失败: ${error.message}`);
+			console.error('Stack trace:', error.stack);
 			return;
 		}
 		const fullRange = new vscode.Range(
