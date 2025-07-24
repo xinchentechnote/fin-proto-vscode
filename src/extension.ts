@@ -72,10 +72,11 @@ function parseDsl(document: vscode.TextDocument, diagnosticCollection: vscode.Di
 	let binModel = parsePacketDsl(document.getText());
 	let diagnostics: vscode.Diagnostic[] = [];
 	binModel.syntaxErrors.forEach(error => {
+		console.info(error);
 		diagnostics.push(new vscode.Diagnostic(
 			new vscode.Range(
-				new vscode.Position(error.line - 1, error.start),
-				new vscode.Position(error.line - 1, error.end)
+				new vscode.Position(error.line - 1, error.startIndex),
+				new vscode.Position(error.line - 1, error.stopIndex)
 			), error.msg));
 	});
 	diagnosticCollection.set(document.uri, diagnostics);
