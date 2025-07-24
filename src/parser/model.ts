@@ -1,7 +1,34 @@
+import { ANTLRErrorListener, Token } from "antlr4ts";
+
+export class DslSyntaxError {
+  constructor(
+  public line:number,
+  public start:number,
+  public end:number,
+  public msg:string,
+  ){}
+}
+
+export class SyntaxErrorCollector implements ANTLRErrorListener<Token> {
+  public errors: DslSyntaxError[] = [];
+
+  syntaxError(
+    _recognizer: any,
+    _offendingSymbol: Token | undefined,
+    line: number,
+    charPositionInLine: number,
+    msg: string,
+    _e: any
+  ): void {
+    this.errors.push(new DslSyntaxError(line,charPositionInLine, charPositionInLine + 1,msg));
+  }
+}
+
 export class BinaryModel {
   metaDataMap = new Map<string, MetaData>();
   options = new Map<string, string>();
   packets: Packet[] = [];
+  syntaxErrors: DslSyntaxError[] = [];
   rootPacket?: Packet;
 
   addMetaData(meta: MetaData) {

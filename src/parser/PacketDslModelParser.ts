@@ -22,7 +22,7 @@ import {
 } from './antlr4/PacketDslParser';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import { PacketDslVisitor } from './antlr4/PacketDslVisitor';
-import { BinaryModel, Field, MatchPair, MetaData, Packet } from './model';
+import { BinaryModel, Field, MatchPair, MetaData, Packet, SyntaxErrorCollector } from './model';
 
 export class PacketDslModelParser
   extends AbstractParseTreeVisitor<any>
@@ -178,8 +178,14 @@ export function parsePacketDsl(text: string): BinaryModel {
   const lexer = new PacketDslLexer(inputStream);
   const tokenStream = new CommonTokenStream(lexer);
   const parser = new PacketDslParser(tokenStream);
-
+  parser.removeErrorListeners();
+  let listener = new SyntaxErrorCollector();
+  parser.addErrorListener(listener);
   const tree = parser.packet();
   const visitor = new PacketDslModelParser();
-  return tree.accept(visitor);
+  let binModel = tree.accept(visitor);
+  if( listener.errors.length>0){
+    (binModel as BinaryModel).syntaxErrors = listener.errors;
+  }
+  return binModel;
 }
