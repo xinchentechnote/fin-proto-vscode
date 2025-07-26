@@ -52,7 +52,7 @@ export class PacketDslModelParser
     for (const pktDef of ctx.packetDefinition()) {
       this.visitPacketDefinition(pktDef);
     }
-
+    this.model.validate();
     return this.model;
   }
 
@@ -192,6 +192,7 @@ export class PacketDslModelParser
         dec.start.charPositionInLine,
         dec.start.charPositionInLine + (dec.stop?.stopIndex ?? dec.start.startIndex + 1) - dec.start.startIndex
       );
+      console.log(metadata.name);
       this.model.addMetaData(metadata);
     }
   }
