@@ -1,5 +1,15 @@
 import { ANTLRErrorListener, Token } from "antlr4ts";
 
+let options: Map<string, Set<string>>;
+options = new Map<string, Set<string>>();
+options.set("StringPreFixLenType", new Set(["u8", "u16", "u32", "u64"]));
+options.set("RepeatPreFixSizeType", new Set(["u8", "u16", "u32", "u64"]));
+options.set("LittleEndian", new Set(["true", "false"]));
+options.set("JavaPackage", new Set());
+options.set("GoPackage", new Set());
+options.set("GoModule", new Set());
+
+
 export class DslSyntaxError {
   constructor(
     public line: number,
@@ -37,16 +47,29 @@ export class BinaryModel {
   }
 
   addMetaData(meta: MetaData) {
-    // if (this.metaDataMap.has(meta.name)) {
-    //   this.addSyntaxError(
-    //     new DslSyntaxError(line, start, end, `Duplicate metadata definition: ${meta.name}`)
-    //   );
-    //   return;
-    // }
+    if (this.metaDataMap.has(meta.name)) {
+      this.addSyntaxError(
+        new DslSyntaxError(meta.line, meta.startIndex, meta.stopIndex, `Duplicate metadata definition: ${meta.name}`)
+      );
+      return;
+    }
     this.metaDataMap.set(meta.name, meta);
   }
 
   addOption(name: string, value: string, line: number, startIndex: number, stopIndex: number) {
+    if (!options.has(name)) {
+      this.addSyntaxError(
+        new DslSyntaxError(line, startIndex, stopIndex, `Unknown option: ${name}. Expected one of: ${Array.from(options.keys()).join(", ")}`)
+      );
+      return;
+    }
+    if (options.get(name)?.size !== 0 &&
+      !options.get(name)?.has(value)) {
+      this.addSyntaxError(
+        new DslSyntaxError(line, startIndex, stopIndex, `Invalid value for option ${name}: ${value}. Expected one of: ${Array.from(options.get(name) ?? []).join(", ")}`)
+      );
+      return;
+    }
     if (this.options.has(name)) {
       this.addSyntaxError(
         new DslSyntaxError(line, startIndex, stopIndex, `Duplicate option definition: ${name}`)
@@ -63,6 +86,7 @@ export class BinaryModel {
       );
       return;
     }
+    this.validatePacket(packet);
     this.packetMaps.set(packet.name, packet);
     this.packets.push(packet);
     if (packet.isRoot) {
@@ -72,6 +96,34 @@ export class BinaryModel {
         );
       } else {
         this.rootPacket = packet;
+      }
+    }
+  }
+
+  validatePacket(packet: Packet) {
+    let fieldNames = new Set<string>();
+    for (const field of packet.fields) {
+      if (fieldNames.has(field.name)) {
+        this.addSyntaxError(
+          new DslSyntaxError(field.line, field.startIndex, field.stopIndex, `Duplicate field name: ${field.name} in packet ${packet.name}`)
+        );
+      } else {
+        fieldNames.add(field.name);
+      }
+      if (field.type === "match") {
+        let keys = new Set<string>();
+        field.matchPairs.forEach(pair => {
+          if (keys.has(pair.key)) {
+            this.addSyntaxError(
+              new DslSyntaxError(pair.line, pair.startIndex, pair.stopIndex, `Duplicate match key: ${pair.key} in field ${field.name} of packet ${packet.name}`)
+            );
+          } else {
+            keys.add(pair.key);
+          }
+        });
+      }
+      if (field.inerObject) {
+        this.validatePacket(field.inerObject);
       }
     }
   }
