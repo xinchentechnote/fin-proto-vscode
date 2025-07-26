@@ -9,6 +9,10 @@ options.set("JavaPackage", new Set());
 options.set("GoPackage", new Set());
 options.set("GoModule", new Set());
 
+const basicTypes = new Set<string>([
+  "char", "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64", "f32", "f64", "string",
+  "uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "float32", "float64", "char[]"
+]);
 
 export class DslSyntaxError {
   constructor(
@@ -100,10 +104,7 @@ export class BinaryModel {
   }
 
   validatePacketField(packet: Packet) {
-    const basicTypes = new Set<string>([
-      "char", "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64", "f32", "f64", "string",
-      "uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "float32", "float64", "char[]"
-    ]);
+
     for (const field of packet.fields) {
       if (basicTypes.has(field.type)) {
         continue;
@@ -168,6 +169,28 @@ export class BinaryModel {
     for (const packet of this.packets) {
       this.validatePacket(packet);
       this.validatePacketField(packet);
+    }
+    //validate meta data
+    for (const meta of this.metaDataMap) {
+      this.validateMetaData(meta[1]);
+    }
+  }
+  validateMetaData(meta: MetaData | undefined) {
+    if (!meta) {
+      return;
+    }
+    if (basicTypes.has(meta.type)) {
+      return;
+    }
+    if (meta.type.startsWith("char[") && meta.type.endsWith("]")) {
+      return;
+    }
+    if (this.metaDataMap.has(meta.type)) {
+      this.validateMetaData(this.metaDataMap.get(meta.type));
+    } else {
+      this.addSyntaxError(
+        new DslSyntaxError(meta.line, meta.startIndex, meta.stopIndex, `Invalid metadata definition: ${meta.type}`)
+      );
     }
   }
 
