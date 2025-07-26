@@ -1,10 +1,8 @@
-import { CharStreams, CommonTokenStream } from 'antlr4ts';
+import { CharStreams, CommonTokenStream, Token } from 'antlr4ts';
 import { PacketDslLexer } from './antlr4/PacketDslLexer';
 import {
   FieldDefinitionContext,
-  InerObjectDeclarationContext,
   InerObjectFieldContext,
-  ListContext,
   MatchFieldContext,
   MatchFieldDeclarationContext,
   MatchPairContext,
@@ -12,13 +10,10 @@ import {
   MetaDataDefinitionContext,
   MetaFieldContext,
   ObjectFieldContext,
-  OptionDeclarationContext,
-  OptionDefinitionContext,
   PacketContext,
   PacketDefinitionContext,
   PacketDslParser,
   TypeContext,
-  ValueContext
 } from './antlr4/PacketDslParser';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import { PacketDslVisitor } from './antlr4/PacketDslVisitor';
@@ -46,7 +41,11 @@ export class PacketDslModelParser
       for (const opt of optDef.optionDeclaration()) {
         const name = opt.IDENTIFIER().text;
         const value = opt.value().text;
-        this.model.addOption(name, value, opt.start.line, opt.start.startIndex, opt.start.stopIndex);
+        this.model.addOption(name,
+          value,
+          opt.start.line,
+          opt.start.charPositionInLine,
+          opt.start.charPositionInLine + (opt.stop?.stopIndex ?? opt.start.startIndex + 1) - opt.start.startIndex);
       }
     }
 
@@ -77,30 +76,28 @@ export class PacketDslModelParser
   }
 
   visitFieldDefinition(ctx: FieldDefinitionContext): Field {
+    let field: Field;
     if (ctx instanceof ObjectFieldContext) {
       const name = ctx.IDENTIFIER().text;
       const isRepeat = !!ctx.REPEAT();
       const type = this.model.getMetaDataType(name) || name;
-      return new Field(name, type, undefined, isRepeat);
-    }
-
-    if (ctx instanceof InerObjectFieldContext) {
-      return this.visitInerObjectField(ctx);
-    }
-
-    if (ctx instanceof MetaFieldContext) {
-      const field = this.visitMetaDataDeclaration(ctx.metaDataDeclaration()!);
+      field = new Field(name, type, undefined, isRepeat);
+    } else if (ctx instanceof InerObjectFieldContext) {
+      field = this.visitInerObjectField(ctx);
+    } else if (ctx instanceof MetaFieldContext) {
+      field = this.visitMetaDataDeclaration(ctx.metaDataDeclaration()!);
       if (ctx.REPEAT()) {
         field.isRepeat = true;
       }
-      return field;
+    } else if (ctx instanceof MatchFieldContext) {
+      field = this.visitMatchFieldDeclaration(ctx.matchFieldDeclaration()!);
+    } else {
+      throw new Error(`Unknown FieldDefinitionContext type: ${ctx.constructor.name}`);
     }
-
-    if (ctx instanceof MatchFieldContext) {
-      return this.visitMatchFieldDeclaration(ctx.matchFieldDeclaration()!);
-    }
-
-    throw new Error(`Unknown FieldDefinitionContext type: ${ctx.constructor.name}`);
+    field.line = ctx.start.line;
+    field.startIndex = ctx.start.charPositionInLine;
+    field.stopIndex = ctx.start.charPositionInLine + (ctx.stop?.stopIndex ?? ctx.start.startIndex + 1) - ctx.start.startIndex;
+    return field;
   }
 
   visitInerObjectField(ctx: InerObjectFieldContext): Field {
@@ -127,34 +124,57 @@ export class PacketDslModelParser
   }
 
   visitMatchFieldDeclaration(ctx: MatchFieldDeclarationContext): Field {
-    const name = ctx._matchKey.text ?? "";
+    const name = ctx._matchName.text ?? "";
+    const matchKey = ctx._matchKey.text ?? "";
     const pairs: MatchPair[] = [];
 
     for (const pair of ctx.matchPair()) {
       pairs.push(...this.visitMatchPair(pair));
     }
 
-    return new Field(name, 'match', undefined, false, undefined, '', name, pairs);
+    return new Field(name, 'match', undefined, false, undefined, '', matchKey, pairs);
   }
 
   visitMatchPair(ctx: MatchPairContext): MatchPair[] {
     const val = ctx.IDENTIFIER().text;
     const pairs: MatchPair[] = [];
-
+    let position: [number, number, number];
     if (ctx.DIGITS()) {
-      pairs.push(new MatchPair(ctx.DIGITS()!.text, val));
+      position = this.parsePosition(ctx.DIGITS()?.symbol);
+      pairs.push(new MatchPair(ctx.DIGITS()!.text, val,
+        position[0],
+        position[1],
+        position[2]));
     } else if (ctx.STRING()) {
-      pairs.push(new MatchPair(ctx.STRING()!.text, val));
+      position = this.parsePosition(ctx.DIGITS()?.symbol);
+      pairs.push(new MatchPair(ctx.STRING()!.text, val, position[0],
+        position[1],
+        position[2]));
     } else if (ctx.list()) {
       for (const d of ctx.list()!.DIGITS()) {
-        pairs.push(new MatchPair(d.text, val));
+        position = this.parsePosition(d.symbol);
+        pairs.push(new MatchPair(d.text, val, position[0],
+          position[1],
+          position[2]));
       }
       for (const s of ctx.list()!.STRING()) {
-        pairs.push(new MatchPair(s.text, val));
+        position = this.parsePosition(s.symbol);
+        pairs.push(new MatchPair(s.text, val, position[0],
+          position[1],
+          position[2]));
       }
     }
-
     return pairs;
+  }
+
+  parsePosition(symbol: Token | undefined): [number, number, number] {
+    if (!symbol) {
+      return [0, 0, 0];
+    }
+    const line = symbol.line;
+    const startIndex = symbol.charPositionInLine;
+    const stopIndex = startIndex + (symbol.stopIndex ?? symbol.startIndex + 1) - symbol.startIndex;
+    return [line, startIndex, stopIndex];
   }
 
   visitMetaDataDefinition(ctx: MetaDataDefinitionContext): void {
@@ -163,7 +183,15 @@ export class PacketDslModelParser
       const type = dec.type()?.text || name;
       const basicType = type;
       const description = dec.STRING_LITERAL()?.text || '';
-      const metadata = new MetaData(name, type, basicType, description.slice(1, -1));
+      const metadata = new MetaData(
+        name,
+        type,
+        basicType,
+        description.slice(1, -1),
+        dec.start.line,
+        dec.start.charPositionInLine,
+        dec.start.charPositionInLine + (dec.stop?.stopIndex ?? dec.start.startIndex + 1) - dec.start.startIndex
+      );
       this.model.addMetaData(metadata);
     }
   }

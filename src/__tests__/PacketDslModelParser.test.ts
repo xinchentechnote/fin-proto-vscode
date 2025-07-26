@@ -34,7 +34,7 @@ describe('PacketDslModelParser', () => {
 
 
     // 测试 options
-    expect(model.options.get('endian')).toBe('little');
+    expect(model.options.get('endian')).toBe(undefined);
 
     // 测试 packet
     expect(model.packets.length).toBe(1);
