@@ -86,7 +86,6 @@ export class BinaryModel {
       );
       return;
     }
-    this.validatePacket(packet);
     this.packetMaps.set(packet.name, packet);
     this.packets.push(packet);
     if (packet.isRoot) {
@@ -97,6 +96,43 @@ export class BinaryModel {
       } else {
         this.rootPacket = packet;
       }
+    }
+  }
+
+  validatePacketField(packet: Packet) {
+    const basicTypes = new Set<string>([
+      "char", "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64", "f32", "f64", "string",
+      "uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "float32", "float64", "char[]"
+    ]);
+    for (const field of packet.fields) {
+      if (basicTypes.has(field.type)) {
+        continue;
+      }
+      if (field.type.startsWith("char[") && field.type.endsWith("]")) {
+        continue;
+      }
+      if (this.metaDataMap.has(field.type)) {
+        continue;
+      }
+      if (field.inerObject) {
+        continue;
+      }
+      if (this.packetMaps.has(field.type)) {
+        continue;
+      }
+      if (field.type === "match") {
+        for (const pair of field.matchPairs) {
+          if (!this.packetMaps.has(pair.value)) {
+            this.addSyntaxError(
+              new DslSyntaxError(pair.line, pair.startIndex, pair.stopIndex, `Unknown match value: ${pair.value} in packet ${packet.name}`)
+            );
+          }
+        }
+        continue;
+      }
+      this.addSyntaxError(
+        new DslSyntaxError(field.line, field.startIndex, field.stopIndex, `Unknown field type: ${field.type} in packet ${packet.name}`)
+      );
     }
   }
 
@@ -125,6 +161,13 @@ export class BinaryModel {
       if (field.inerObject) {
         this.validatePacket(field.inerObject);
       }
+    }
+  }
+
+  validate() {
+    for (const packet of this.packets) {
+      this.validatePacket(packet);
+      this.validatePacketField(packet);
     }
   }
 
