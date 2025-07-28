@@ -244,6 +244,7 @@ export class Field extends Positioned {
     public inerObject?: Packet,
     public doc: string = "",
     public matchType?: string,
+    public checkSumType?: string,
     public matchPairs: MatchPair[] = [],
     line: number = 0,
     startIndex: number = 0,

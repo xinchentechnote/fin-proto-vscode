@@ -3,8 +3,9 @@ import { PacketDslVisitor } from './antlr4/PacketDslVisitor';
 import { CharStreams, CommonTokenStream, Token } from 'antlr4ts';
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode';
 import { PacketDslLexer } from './antlr4/PacketDslLexer';
-import { InerObjectFieldContext, MatchFieldContext, MatchFieldDeclarationContext, MetaDataDeclarationContext, MetaDataDefinitionContext, MetaFieldContext, ObjectFieldContext, OptionDeclarationContext, OptionDefinitionContext, PacketContext, PacketDefinitionContext, PacketDslParser } from './antlr4/PacketDslParser';
+import { CheckSumFieldContext, InerObjectFieldContext, LengthFieldContext, MatchFieldContext, MatchFieldDeclarationContext, MetaDataDeclarationContext, MetaDataDefinitionContext, MetaFieldContext, ObjectFieldContext, OptionDeclarationContext, OptionDefinitionContext, PacketContext, PacketDefinitionContext, PacketDslParser } from './antlr4/PacketDslParser';
 import { SyntaxErrorCollector } from './model';
+import { FoldingRange } from 'vscode';
 
 export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
   implements PacketDslVisitor<string> {
@@ -85,6 +86,12 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
       if (field instanceof InerObjectFieldContext) {
         lines.push(addIdent4ln(this.visitInerObjectField(field)));
       }
+      if (field instanceof LengthFieldContext) {
+        lines.push(addIdent4ln(this.visitLengthField(field)));
+      }
+      if (field instanceof CheckSumFieldContext) {
+        lines.push(addIdent4ln(this.visitCheckSumField(field)));
+      }
       if (field instanceof MatchFieldContext) {
         lines.push(addIdent4ln(this.visitMatchField(field)));
       }
@@ -92,6 +99,25 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
     lines.push('}');
     lines.push(this.getHiddenRightAtSameLine(ctx.stop));
     return lines.join('');
+  }
+
+
+  visitLengthField(ctx: LengthFieldContext): string {
+    const lfd = ctx.lengthFieldDeclaration();
+    let desc = "";
+    if (lfd.STRING_LITERAL()) {
+      desc = " " + lfd.STRING_LITERAL()?.text;
+    }
+    return lfd.type().text + " " + lfd._name.text + " @lengthOf(" + lfd._from.text + ")" + desc;
+  }
+
+  visitCheckSumField(ctx: CheckSumFieldContext): string {
+    const cfd = ctx.checkSumFieldDeclaration();
+    let desc = "";
+    if (cfd.STRING_LITERAL()) {
+      desc = " " + cfd.STRING_LITERAL()?.text;
+    }
+    return cfd.type().text + " " + cfd._name.text + " @calculatedFrom(" + cfd._from.text + ")" + desc;
   }
 
   visitOptionDefinition(ctx: OptionDefinitionContext): string {
@@ -131,9 +157,6 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
       formatted += ctx.type()?.text + ' ';
     }
     formatted += ctx._name.text;
-    if (ctx._from) {
-      formatted += ` = lengthof(${ctx._from.text})`;
-    }
     if (ctx.STRING_LITERAL()) {
       formatted += ' ' + ctx.STRING_LITERAL()?.text;
     }

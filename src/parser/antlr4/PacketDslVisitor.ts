@@ -6,6 +6,8 @@ import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 import { InerObjectFieldContext } from "./PacketDslParser";
 import { MetaFieldContext } from "./PacketDslParser";
 import { ObjectFieldContext } from "./PacketDslParser";
+import { LengthFieldContext } from "./PacketDslParser";
+import { CheckSumFieldContext } from "./PacketDslParser";
 import { MatchFieldContext } from "./PacketDslParser";
 import { PacketContext } from "./PacketDslParser";
 import { OptionDefinitionContext } from "./PacketDslParser";
@@ -13,6 +15,8 @@ import { OptionDeclarationContext } from "./PacketDslParser";
 import { PacketDefinitionContext } from "./PacketDslParser";
 import { FieldDefinitionContext } from "./PacketDslParser";
 import { MetaDataDefinitionContext } from "./PacketDslParser";
+import { LengthFieldDeclarationContext } from "./PacketDslParser";
+import { CheckSumFieldDeclarationContext } from "./PacketDslParser";
 import { MetaDataDeclarationContext } from "./PacketDslParser";
 import { ValueContext } from "./PacketDslParser";
 import { TypeContext } from "./PacketDslParser";
@@ -53,6 +57,22 @@ export interface PacketDslVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitObjectField?: (ctx: ObjectFieldContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `LengthField`
+	 * labeled alternative in `PacketDslParser.fieldDefinition`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitLengthField?: (ctx: LengthFieldContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `CheckSumField`
+	 * labeled alternative in `PacketDslParser.fieldDefinition`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitCheckSumField?: (ctx: CheckSumFieldContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `MatchField`
@@ -103,6 +123,20 @@ export interface PacketDslVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitMetaDataDefinition?: (ctx: MetaDataDefinitionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `PacketDslParser.lengthFieldDeclaration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitLengthFieldDeclaration?: (ctx: LengthFieldDeclarationContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `PacketDslParser.checkSumFieldDeclaration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitCheckSumFieldDeclaration?: (ctx: CheckSumFieldDeclarationContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `PacketDslParser.metaDataDeclaration`.

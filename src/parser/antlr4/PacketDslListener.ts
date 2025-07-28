@@ -6,6 +6,8 @@ import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
 import { InerObjectFieldContext } from "./PacketDslParser";
 import { MetaFieldContext } from "./PacketDslParser";
 import { ObjectFieldContext } from "./PacketDslParser";
+import { LengthFieldContext } from "./PacketDslParser";
+import { CheckSumFieldContext } from "./PacketDslParser";
 import { MatchFieldContext } from "./PacketDslParser";
 import { PacketContext } from "./PacketDslParser";
 import { OptionDefinitionContext } from "./PacketDslParser";
@@ -13,6 +15,8 @@ import { OptionDeclarationContext } from "./PacketDslParser";
 import { PacketDefinitionContext } from "./PacketDslParser";
 import { FieldDefinitionContext } from "./PacketDslParser";
 import { MetaDataDefinitionContext } from "./PacketDslParser";
+import { LengthFieldDeclarationContext } from "./PacketDslParser";
+import { CheckSumFieldDeclarationContext } from "./PacketDslParser";
 import { MetaDataDeclarationContext } from "./PacketDslParser";
 import { ValueContext } from "./PacketDslParser";
 import { TypeContext } from "./PacketDslParser";
@@ -65,6 +69,32 @@ export interface PacketDslListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitObjectField?: (ctx: ObjectFieldContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `LengthField`
+	 * labeled alternative in `PacketDslParser.fieldDefinition`.
+	 * @param ctx the parse tree
+	 */
+	enterLengthField?: (ctx: LengthFieldContext) => void;
+	/**
+	 * Exit a parse tree produced by the `LengthField`
+	 * labeled alternative in `PacketDslParser.fieldDefinition`.
+	 * @param ctx the parse tree
+	 */
+	exitLengthField?: (ctx: LengthFieldContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `CheckSumField`
+	 * labeled alternative in `PacketDslParser.fieldDefinition`.
+	 * @param ctx the parse tree
+	 */
+	enterCheckSumField?: (ctx: CheckSumFieldContext) => void;
+	/**
+	 * Exit a parse tree produced by the `CheckSumField`
+	 * labeled alternative in `PacketDslParser.fieldDefinition`.
+	 * @param ctx the parse tree
+	 */
+	exitCheckSumField?: (ctx: CheckSumFieldContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `MatchField`
@@ -144,6 +174,28 @@ export interface PacketDslListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitMetaDataDefinition?: (ctx: MetaDataDefinitionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `PacketDslParser.lengthFieldDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	enterLengthFieldDeclaration?: (ctx: LengthFieldDeclarationContext) => void;
+	/**
+	 * Exit a parse tree produced by `PacketDslParser.lengthFieldDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	exitLengthFieldDeclaration?: (ctx: LengthFieldDeclarationContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `PacketDslParser.checkSumFieldDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	enterCheckSumFieldDeclaration?: (ctx: CheckSumFieldDeclarationContext) => void;
+	/**
+	 * Exit a parse tree produced by `PacketDslParser.checkSumFieldDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	exitCheckSumFieldDeclaration?: (ctx: CheckSumFieldDeclarationContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `PacketDslParser.metaDataDeclaration`.
