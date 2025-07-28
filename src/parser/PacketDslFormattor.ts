@@ -108,7 +108,11 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
     if (lfd.STRING_LITERAL()) {
       desc = " " + lfd.STRING_LITERAL()?.text;
     }
-    return lfd.type().text + " " + lfd._name.text + " @lengthOf(" + lfd._from.text + ")" + desc;
+    let type = "";
+    if (lfd.type()) {
+      type = lfd.type()?.text + " ";
+    }
+    return type + lfd._name.text + " @lengthOf(" + lfd._from.text + ")" + desc;
   }
 
   visitCheckSumField(ctx: CheckSumFieldContext): string {
@@ -117,7 +121,11 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
     if (cfd.STRING_LITERAL()) {
       desc = " " + cfd.STRING_LITERAL()?.text;
     }
-    return cfd.type().text + " " + cfd._name.text + " @calculatedFrom(" + cfd._from.text + ")" + desc;
+    let type = "";
+    if (cfd.type()) {
+      type = cfd.type()?.text + " ";
+    }
+    return type + cfd._name.text + " @calculatedFrom(" + cfd._from.text + ")" + desc;
   }
 
   visitOptionDefinition(ctx: OptionDefinitionContext): string {
