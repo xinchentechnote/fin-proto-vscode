@@ -104,7 +104,6 @@ export class BinaryModel {
   }
 
   validatePacketField(packet: Packet) {
-
     for (const field of packet.fields) {
       if (basicTypes.has(field.type)) {
         continue;
@@ -116,6 +115,7 @@ export class BinaryModel {
         continue;
       }
       if (field.inerObject) {
+        this.validatePacket(field.inerObject);
         continue;
       }
       if (this.packetMaps.has(field.type)) {
@@ -251,6 +251,10 @@ export class Field extends Positioned {
     stopIndex: number = 0
   ) {
     super(line, startIndex, stopIndex);
+  }
+
+  toString(): string {
+    return `Field(name: ${this.name}, type: ${this.type}, isRepeat: ${this.isRepeat}, lengthOfField: ${this.lengthOfField}, doc: ${this.doc}, line: ${this.line}, startIndex: ${this.startIndex}, stopIndex: ${this.stopIndex})`;
   }
 }
 
