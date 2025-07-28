@@ -1,8 +1,10 @@
 import { CharStreams, CommonTokenStream, Token } from 'antlr4ts';
 import { PacketDslLexer } from './antlr4/PacketDslLexer';
 import {
+  CheckSumFieldContext,
   FieldDefinitionContext,
   InerObjectFieldContext,
+  LengthFieldContext,
   MatchFieldContext,
   MatchFieldDeclarationContext,
   MatchPairContext,
@@ -17,7 +19,7 @@ import {
 } from './antlr4/PacketDslParser';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import { PacketDslVisitor } from './antlr4/PacketDslVisitor';
-import { BinaryModel, Field, MatchPair, MetaData, Packet, SyntaxErrorCollector } from './model';
+import { BinaryModel, DslSyntaxError, Field, MatchPair, MetaData, Packet, SyntaxErrorCollector } from './model';
 
 export class PacketDslModelParser
   extends AbstractParseTreeVisitor<any>
@@ -64,6 +66,9 @@ export class PacketDslModelParser
 
     for (const fctx of ctx.fieldDefinition()) {
       const field = this.visitFieldDefinition(fctx);
+      if (!field) {
+        continue;
+      }
       fields.push(field);
       if (field.type === 'match') {
         matchFields[field.name] = field.matchPairs;
@@ -75,7 +80,7 @@ export class PacketDslModelParser
     return this.model;
   }
 
-  visitFieldDefinition(ctx: FieldDefinitionContext): Field {
+  visitFieldDefinition(ctx: FieldDefinitionContext): Field | undefined {
     let field: Field;
     if (ctx instanceof ObjectFieldContext) {
       const name = ctx.IDENTIFIER().text;
@@ -84,6 +89,10 @@ export class PacketDslModelParser
       field = new Field(name, type, undefined, isRepeat);
     } else if (ctx instanceof InerObjectFieldContext) {
       field = this.visitInerObjectField(ctx);
+    } else if (ctx instanceof LengthFieldContext) {
+      field = this.visitLengthField(ctx);
+    } else if (ctx instanceof CheckSumFieldContext) {
+      field = this.visitCheckSumField(ctx);
     } else if (ctx instanceof MetaFieldContext) {
       field = this.visitMetaDataDeclaration(ctx.metaDataDeclaration()!);
       if (ctx.REPEAT()) {
@@ -92,12 +101,35 @@ export class PacketDslModelParser
     } else if (ctx instanceof MatchFieldContext) {
       field = this.visitMatchFieldDeclaration(ctx.matchFieldDeclaration()!);
     } else {
-      throw new Error(`Unknown FieldDefinitionContext type: ${ctx.constructor.name}`);
+      this.model.addSyntaxError(
+        new DslSyntaxError(ctx.start.line, ctx.start.charPositionInLine, ctx.start.charPositionInLine + 1, `Unknown FieldDefinitionContext type: ${ctx.constructor.name}`)
+      );
+      return undefined;
     }
     field.line = ctx.start.line;
     field.startIndex = ctx.start.charPositionInLine;
     field.stopIndex = ctx.start.charPositionInLine + (ctx.stop?.stopIndex ?? ctx.start.startIndex + 1) - ctx.start.startIndex;
     return field;
+  }
+
+  visitLengthField(ctx: LengthFieldContext): Field {
+    const lfd = ctx.lengthFieldDeclaration();
+    const name = lfd._name.text ?? '';
+    const typeText = lfd.type()?.text || name;
+    const lengthOfField = lfd._from?.text ?? '';
+    const doc = lfd.STRING_LITERAL()?.text?.slice(1, -1) || '';
+    const baseType = this.model.getMetaDataType(typeText) || typeText;
+    return new Field(name, baseType, lengthOfField, false, undefined, doc);
+  }
+
+  visitCheckSumField(ctx: CheckSumFieldContext): Field {
+    const lfd = ctx.checkSumFieldDeclaration();
+    const name = lfd._name.text ?? '';
+    const typeText = lfd.type()?.text || name;
+    const checkSumType = lfd._from?.text ?? '';
+    const doc = lfd.STRING_LITERAL()?.text?.slice(1, -1) || '';
+    const baseType = this.model.getMetaDataType(typeText) || typeText;
+    return new Field(name, baseType, undefined, false, undefined, doc, undefined, checkSumType);
   }
 
   visitInerObjectField(ctx: InerObjectFieldContext): Field {
@@ -107,7 +139,11 @@ export class PacketDslModelParser
     const subFields: Field[] = [];
 
     for (const sub of decl.fieldDefinition()) {
-      subFields.push(this.visitFieldDefinition(sub));
+      let field = this.visitFieldDefinition(sub);
+      if (!field) {
+        continue;
+      }
+      subFields.push(field);
     }
 
     const pkt = new Packet(name, false, subFields);
@@ -116,11 +152,10 @@ export class PacketDslModelParser
 
   visitMetaDataDeclaration(ctx: MetaDataDeclarationContext): Field {
     const name = ctx._name.text ?? '';
-    const lengthOfField = ctx._from?.text ?? '';
     const typeText = ctx.type()?.text || name;
     const doc = ctx.STRING_LITERAL()?.text?.slice(1, -1) || '';
     const baseType = this.model.getMetaDataType(typeText) || typeText;
-    return new Field(name, baseType, lengthOfField, false, undefined, doc);
+    return new Field(name, baseType, undefined, false, undefined, doc);
   }
 
   visitMatchFieldDeclaration(ctx: MatchFieldDeclarationContext): Field {
@@ -132,7 +167,7 @@ export class PacketDslModelParser
       pairs.push(...this.visitMatchPair(pair));
     }
 
-    return new Field(name, 'match', undefined, false, undefined, '', matchKey, pairs);
+    return new Field(name, 'match', undefined, false, undefined, '', matchKey, undefined, pairs);
   }
 
   visitMatchPair(ctx: MatchPairContext): MatchPair[] {
@@ -214,7 +249,10 @@ export function parsePacketDsl(text: string): BinaryModel {
   const visitor = new PacketDslModelParser();
   let binModel = tree.accept(visitor);
   if (listener.errors.length > 0) {
-    (binModel as BinaryModel).syntaxErrors = listener.errors;
+    listener.errors.forEach(e => {
+      (binModel as BinaryModel).syntaxErrors.push(e);
+    });
+    console.info("DSL Syntax Errors:\n" + listener.errors.join("\n"));
   }
   return binModel;
 }
