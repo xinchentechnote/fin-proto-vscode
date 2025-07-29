@@ -181,7 +181,7 @@ export class PacketDslModelParser
         position[1],
         position[2]));
     } else if (ctx.STRING()) {
-      position = this.parsePosition(ctx.DIGITS()?.symbol);
+      position = this.parsePosition(ctx.STRING()?.symbol);
       pairs.push(new MatchPair(ctx.STRING()!.text, val, position[0],
         position[1],
         position[2]));
