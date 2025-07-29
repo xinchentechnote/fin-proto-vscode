@@ -115,7 +115,7 @@ export class BinaryModel {
         continue;
       }
       if (field.inerObject) {
-        this.validatePacket(field.inerObject);
+        this.validatePacketField(field.inerObject);
         continue;
       }
       if (this.packetMaps.has(field.type)) {
