@@ -155,6 +155,11 @@ export class BinaryModel {
               new DslSyntaxError(pair.line, pair.startIndex, pair.stopIndex, `Duplicate match key: ${pair.key} in field ${field.name} of packet ${packet.name}`)
             );
           } else {
+            if(!this.packetMaps.has(pair.value)) {
+              this.addSyntaxError(
+                new DslSyntaxError(pair.line, pair.startIndex, pair.stopIndex, `Unknown match value: ${pair.value} in field ${field.name} of packet ${packet.name}`)
+              );
+            }
             keys.add(pair.key);
           }
         });
