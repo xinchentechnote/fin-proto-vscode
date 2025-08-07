@@ -112,7 +112,7 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
     if (lfd.type()) {
       type = lfd.type()?.text + " ";
     }
-    return type + lfd._name.text + " @lengthOf(" + lfd._from.text + ")" + desc;
+    return type + lfd._name.text + " @lengthOf(" + lfd._from.text + ")" + desc + ",";
   }
 
   visitCheckSumField(ctx: CheckSumFieldContext): string {
@@ -125,7 +125,7 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
     if (cfd.type()) {
       type = cfd.type()?.text + " ";
     }
-    return type + cfd._name.text + " @calculatedFrom(" + cfd._from.text + ")" + desc;
+    return type + cfd._name.text + " @calculatedFrom(" + cfd._from.text + ")" + desc + ",";
   }
 
   visitOptionDefinition(ctx: OptionDefinitionContext): string {
@@ -221,7 +221,7 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
     lines.push(`match ${ctx._matchKey.text} as ${ctx._matchName.text} {\n`);
     for (const pair of ctx.matchPair() ?? []) {
       const leftHidden = this.getHiddenLeft(pair.start).trim();
-      if (leftHidden) { lines.push('    ' + leftHidden + '\n'); }
+      if (leftHidden) { lines.push(addIdent4ln(leftHidden)); }
       let key = '';
       if (pair.DIGITS()) {
         key = pair.DIGITS()?.text ?? '';
