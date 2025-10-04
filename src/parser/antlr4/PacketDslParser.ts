@@ -612,10 +612,8 @@ export class PacketDslParser extends Parser {
 			}
 			this.state = 132;
 			_localctx._name = this.match(PacketDslParser.IDENTIFIER);
-			{
 			this.state = 133;
 			this.calculatedFromAttribute();
-			}
 			this.state = 135;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
@@ -1864,11 +1862,11 @@ export class LengthFieldDeclarationContext extends ParserRuleContext {
 
 export class CheckSumFieldDeclarationContext extends ParserRuleContext {
 	public _name!: Token;
+	public calculatedFromAttribute(): CalculatedFromAttributeContext {
+		return this.getRuleContext(0, CalculatedFromAttributeContext);
+	}
 	public COMMA(): TerminalNode { return this.getToken(PacketDslParser.COMMA, 0); }
 	public IDENTIFIER(): TerminalNode { return this.getToken(PacketDslParser.IDENTIFIER, 0); }
-	public calculatedFromAttribute(): CalculatedFromAttributeContext | undefined {
-		return this.tryGetRuleContext(0, CalculatedFromAttributeContext);
-	}
 	public type(): TypeContext | undefined {
 		return this.tryGetRuleContext(0, TypeContext);
 	}

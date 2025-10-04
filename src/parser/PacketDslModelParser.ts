@@ -1,10 +1,13 @@
 import { CharStreams, CommonTokenStream, Token } from 'antlr4ts';
 import { PacketDslLexer } from './antlr4/PacketDslLexer';
 import {
+  CalculatedFromAttributeContext,
   CheckSumFieldContext,
   FieldDefinitionContext,
   InerObjectFieldContext,
   LengthFieldContext,
+  LengthFieldDeclarationContext,
+  LengthOfAttributeContext,
   MatchFieldContext,
   MatchFieldDeclarationContext,
   MatchPairContext,
@@ -71,6 +74,14 @@ export class PacketDslModelParser
       if (!field) {
         continue;
       }
+      for (const fwa of fwas) {
+        if (fwa instanceof LengthOfAttributeContext){
+          field.lengthOfField = fwa._from.text;
+        }
+        if (fwa instanceof CalculatedFromAttributeContext) {
+          field.checkSumType = fwa._from.text;
+        }
+      }
       fields.push(field);
       if (field.type === 'match') {
         matchFields[field.name] = field.matchPairs;
@@ -128,7 +139,7 @@ export class PacketDslModelParser
     const lfd = ctx.checkSumFieldDeclaration();
     const name = lfd._name.text ?? '';
     const typeText = lfd.type()?.text || name;
-    const checkSumType = lfd.calculatedFromAttribute()?._from?.text ?? '';
+    const checkSumType = lfd.calculatedFromAttribute()._from?.text ?? '';
     const doc = lfd.STRING_LITERAL()?.text?.slice(1, -1) || '';
     const baseType = this.model.getMetaDataType(typeText) || typeText;
     return new Field(name, baseType, undefined, false, undefined, doc, undefined, checkSumType);

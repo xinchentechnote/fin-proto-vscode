@@ -3,7 +3,7 @@ import { PacketDslVisitor } from './antlr4/PacketDslVisitor';
 import { CharStreams, CommonTokenStream, Token } from 'antlr4ts';
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode';
 import { PacketDslLexer } from './antlr4/PacketDslLexer';
-import { CheckSumFieldContext, FieldAttributeContext, InerObjectFieldContext, LengthFieldContext, MatchFieldContext, MatchFieldDeclarationContext, MetaDataDeclarationContext, MetaDataDefinitionContext, MetaFieldContext, ObjectFieldContext, OptionDeclarationContext, OptionDefinitionContext, PacketContext, PacketDefinitionContext, PacketDslParser } from './antlr4/PacketDslParser';
+import { CalculatedFromAttributeContext, CheckSumFieldContext, FieldAttributeContext, InerObjectFieldContext, LengthFieldContext, LengthOfAttributeContext, MatchFieldContext, MatchFieldDeclarationContext, MetaDataDeclarationContext, MetaDataDefinitionContext, MetaFieldContext, ObjectFieldContext, OptionDeclarationContext, OptionDefinitionContext, PacketContext, PacketDefinitionContext, PacketDslParser, PaddingAttributeContext } from './antlr4/PacketDslParser';
 import { SyntaxErrorCollector } from './model';
 import { FoldingRange } from 'vscode';
 
@@ -78,7 +78,7 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
     lines.push(`packet ${ctx.IDENTIFIER()?.text} {\n`);
     for (const fieldWithAttribute of ctx.fieldDefinitionWithAttribute() ?? []) {
       const fwas = fieldWithAttribute.fieldAttribute();
-      if (fwas) {
+      if (fwas.length > 0) {
         lines.push(this.formatFieldWithAttribute(fwas));
       }
       const field = fieldWithAttribute.fieldDefinition();
@@ -109,7 +109,15 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
   formatFieldWithAttribute(fwas: FieldAttributeContext[]): string {
     const lines: string[] = [];
     for (const fwa of fwas) {
-      
+      if (fwa.lengthOfAttribute()) {
+        lines.push(addIdent4ln("@lengthOf(" + fwa.lengthOfAttribute()?._from.text + ")"));
+      }
+      if (fwa.calculatedFromAttribute()) {
+        lines.push(addIdent4ln("@calculatedFrom(" + fwa.calculatedFromAttribute()?._from.text + ")"));
+      }
+      if (fwa.paddingAttribute()) {
+        lines.push(addIdent4ln("@" + fwa.paddingAttribute()?._dir.text + "Padding(" + fwa.paddingAttribute()?._padding.text + ")"));
+      }
     }
     return lines.join('');
   }
@@ -138,7 +146,7 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
     if (cfd.type()) {
       type = cfd.type()?.text + " ";
     }
-    return type + cfd._name.text + " @calculatedFrom(" + cfd.calculatedFromAttribute()?._from.text + ")" + desc + ",";
+    return type + cfd._name.text + " @calculatedFrom(" + cfd.calculatedFromAttribute()._from.text + ")" + desc + ",";
   }
 
   visitOptionDefinition(ctx: OptionDefinitionContext): string {
