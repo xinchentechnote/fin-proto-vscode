@@ -13,10 +13,15 @@ import { PacketContext } from "./PacketDslParser";
 import { OptionDefinitionContext } from "./PacketDslParser";
 import { OptionDeclarationContext } from "./PacketDslParser";
 import { PacketDefinitionContext } from "./PacketDslParser";
+import { FieldDefinitionWithAttributeContext } from "./PacketDslParser";
 import { FieldDefinitionContext } from "./PacketDslParser";
 import { MetaDataDefinitionContext } from "./PacketDslParser";
 import { LengthFieldDeclarationContext } from "./PacketDslParser";
 import { CheckSumFieldDeclarationContext } from "./PacketDslParser";
+import { FieldAttributeContext } from "./PacketDslParser";
+import { LengthOfAttributeContext } from "./PacketDslParser";
+import { CalculatedFromAttributeContext } from "./PacketDslParser";
+import { PaddingAttributeContext } from "./PacketDslParser";
 import { MetaDataDeclarationContext } from "./PacketDslParser";
 import { ValueContext } from "./PacketDslParser";
 import { TypeContext } from "./PacketDslParser";
@@ -111,6 +116,13 @@ export interface PacketDslVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitPacketDefinition?: (ctx: PacketDefinitionContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by `PacketDslParser.fieldDefinitionWithAttribute`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitFieldDefinitionWithAttribute?: (ctx: FieldDefinitionWithAttributeContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by `PacketDslParser.fieldDefinition`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -137,6 +149,34 @@ export interface PacketDslVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitCheckSumFieldDeclaration?: (ctx: CheckSumFieldDeclarationContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `PacketDslParser.fieldAttribute`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitFieldAttribute?: (ctx: FieldAttributeContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `PacketDslParser.lengthOfAttribute`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitLengthOfAttribute?: (ctx: LengthOfAttributeContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `PacketDslParser.calculatedFromAttribute`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitCalculatedFromAttribute?: (ctx: CalculatedFromAttributeContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `PacketDslParser.paddingAttribute`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPaddingAttribute?: (ctx: PaddingAttributeContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `PacketDslParser.metaDataDeclaration`.

@@ -3,7 +3,7 @@ import { PacketDslVisitor } from './antlr4/PacketDslVisitor';
 import { CharStreams, CommonTokenStream, Token } from 'antlr4ts';
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode';
 import { PacketDslLexer } from './antlr4/PacketDslLexer';
-import { CheckSumFieldContext, InerObjectFieldContext, LengthFieldContext, MatchFieldContext, MatchFieldDeclarationContext, MetaDataDeclarationContext, MetaDataDefinitionContext, MetaFieldContext, ObjectFieldContext, OptionDeclarationContext, OptionDefinitionContext, PacketContext, PacketDefinitionContext, PacketDslParser } from './antlr4/PacketDslParser';
+import { CheckSumFieldContext, FieldAttributeContext, InerObjectFieldContext, LengthFieldContext, MatchFieldContext, MatchFieldDeclarationContext, MetaDataDeclarationContext, MetaDataDefinitionContext, MetaFieldContext, ObjectFieldContext, OptionDeclarationContext, OptionDefinitionContext, PacketContext, PacketDefinitionContext, PacketDslParser } from './antlr4/PacketDslParser';
 import { SyntaxErrorCollector } from './model';
 import { FoldingRange } from 'vscode';
 
@@ -76,7 +76,12 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
     lines.push(this.getHiddenLeft(ctx.start));
     if (ctx.ROOT()) { lines.push('root '); }
     lines.push(`packet ${ctx.IDENTIFIER()?.text} {\n`);
-    for (const field of ctx.fieldDefinition() ?? []) {
+    for (const fieldWithAttribute of ctx.fieldDefinitionWithAttribute() ?? []) {
+      const fwas = fieldWithAttribute.fieldAttribute();
+      if (fwas) {
+        lines.push(this.formatFieldWithAttribute(fwas));
+      }
+      const field = fieldWithAttribute.fieldDefinition();
       if (field instanceof MetaFieldContext) {
         lines.push(addIdent4ln(this.visitMetaField(field)));
       }
@@ -101,6 +106,14 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
     return lines.join('');
   }
 
+  formatFieldWithAttribute(fwas: FieldAttributeContext[]): string {
+    const lines: string[] = [];
+    for (const fwa of fwas) {
+      
+    }
+    return lines.join('');
+  }
+
 
   visitLengthField(ctx: LengthFieldContext): string {
     const lfd = ctx.lengthFieldDeclaration();
@@ -112,7 +125,7 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
     if (lfd.type()) {
       type = lfd.type()?.text + " ";
     }
-    return type + lfd._name.text + " @lengthOf(" + lfd._from.text + ")" + desc + ",";
+    return type + lfd._name.text + " @lengthOf(" + lfd.lengthOfAttribute()._from.text + ")" + desc + ",";
   }
 
   visitCheckSumField(ctx: CheckSumFieldContext): string {
@@ -125,7 +138,7 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
     if (cfd.type()) {
       type = cfd.type()?.text + " ";
     }
-    return type + cfd._name.text + " @calculatedFrom(" + cfd._from.text + ")" + desc + ",";
+    return type + cfd._name.text + " @calculatedFrom(" + cfd.calculatedFromAttribute()?._from.text + ")" + desc + ",";
   }
 
   visitOptionDefinition(ctx: OptionDefinitionContext): string {

@@ -64,7 +64,9 @@ export class PacketDslModelParser
     const fields: Field[] = [];
     const matchFields: Record<string, MatchPair[]> = {};
 
-    for (const fctx of ctx.fieldDefinition()) {
+    for (const fctxwa of ctx.fieldDefinitionWithAttribute()) {
+      const fwas = fctxwa.fieldAttribute();
+      const fctx = fctxwa.fieldDefinition();
       const field = this.visitFieldDefinition(fctx);
       if (!field) {
         continue;
@@ -116,7 +118,7 @@ export class PacketDslModelParser
     const lfd = ctx.lengthFieldDeclaration();
     const name = lfd._name.text ?? '';
     const typeText = lfd.type()?.text || name;
-    const lengthOfField = lfd._from?.text ?? '';
+    const lengthOfField = lfd.lengthOfAttribute()._from?.text ?? '';
     const doc = lfd.STRING_LITERAL()?.text?.slice(1, -1) || '';
     const baseType = this.model.getMetaDataType(typeText) || typeText;
     return new Field(name, baseType, lengthOfField, false, undefined, doc);
@@ -126,7 +128,7 @@ export class PacketDslModelParser
     const lfd = ctx.checkSumFieldDeclaration();
     const name = lfd._name.text ?? '';
     const typeText = lfd.type()?.text || name;
-    const checkSumType = lfd._from?.text ?? '';
+    const checkSumType = lfd.calculatedFromAttribute()?._from?.text ?? '';
     const doc = lfd.STRING_LITERAL()?.text?.slice(1, -1) || '';
     const baseType = this.model.getMetaDataType(typeText) || typeText;
     return new Field(name, baseType, undefined, false, undefined, doc, undefined, checkSumType);

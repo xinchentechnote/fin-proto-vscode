@@ -13,10 +13,15 @@ import { PacketContext } from "./PacketDslParser";
 import { OptionDefinitionContext } from "./PacketDslParser";
 import { OptionDeclarationContext } from "./PacketDslParser";
 import { PacketDefinitionContext } from "./PacketDslParser";
+import { FieldDefinitionWithAttributeContext } from "./PacketDslParser";
 import { FieldDefinitionContext } from "./PacketDslParser";
 import { MetaDataDefinitionContext } from "./PacketDslParser";
 import { LengthFieldDeclarationContext } from "./PacketDslParser";
 import { CheckSumFieldDeclarationContext } from "./PacketDslParser";
+import { FieldAttributeContext } from "./PacketDslParser";
+import { LengthOfAttributeContext } from "./PacketDslParser";
+import { CalculatedFromAttributeContext } from "./PacketDslParser";
+import { PaddingAttributeContext } from "./PacketDslParser";
 import { MetaDataDeclarationContext } from "./PacketDslParser";
 import { ValueContext } from "./PacketDslParser";
 import { TypeContext } from "./PacketDslParser";
@@ -154,6 +159,17 @@ export interface PacketDslListener extends ParseTreeListener {
 	exitPacketDefinition?: (ctx: PacketDefinitionContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `PacketDslParser.fieldDefinitionWithAttribute`.
+	 * @param ctx the parse tree
+	 */
+	enterFieldDefinitionWithAttribute?: (ctx: FieldDefinitionWithAttributeContext) => void;
+	/**
+	 * Exit a parse tree produced by `PacketDslParser.fieldDefinitionWithAttribute`.
+	 * @param ctx the parse tree
+	 */
+	exitFieldDefinitionWithAttribute?: (ctx: FieldDefinitionWithAttributeContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `PacketDslParser.fieldDefinition`.
 	 * @param ctx the parse tree
 	 */
@@ -196,6 +212,50 @@ export interface PacketDslListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitCheckSumFieldDeclaration?: (ctx: CheckSumFieldDeclarationContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `PacketDslParser.fieldAttribute`.
+	 * @param ctx the parse tree
+	 */
+	enterFieldAttribute?: (ctx: FieldAttributeContext) => void;
+	/**
+	 * Exit a parse tree produced by `PacketDslParser.fieldAttribute`.
+	 * @param ctx the parse tree
+	 */
+	exitFieldAttribute?: (ctx: FieldAttributeContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `PacketDslParser.lengthOfAttribute`.
+	 * @param ctx the parse tree
+	 */
+	enterLengthOfAttribute?: (ctx: LengthOfAttributeContext) => void;
+	/**
+	 * Exit a parse tree produced by `PacketDslParser.lengthOfAttribute`.
+	 * @param ctx the parse tree
+	 */
+	exitLengthOfAttribute?: (ctx: LengthOfAttributeContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `PacketDslParser.calculatedFromAttribute`.
+	 * @param ctx the parse tree
+	 */
+	enterCalculatedFromAttribute?: (ctx: CalculatedFromAttributeContext) => void;
+	/**
+	 * Exit a parse tree produced by `PacketDslParser.calculatedFromAttribute`.
+	 * @param ctx the parse tree
+	 */
+	exitCalculatedFromAttribute?: (ctx: CalculatedFromAttributeContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `PacketDslParser.paddingAttribute`.
+	 * @param ctx the parse tree
+	 */
+	enterPaddingAttribute?: (ctx: PaddingAttributeContext) => void;
+	/**
+	 * Exit a parse tree produced by `PacketDslParser.paddingAttribute`.
+	 * @param ctx the parse tree
+	 */
+	exitPaddingAttribute?: (ctx: PaddingAttributeContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `PacketDslParser.metaDataDeclaration`.
