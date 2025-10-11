@@ -19,8 +19,8 @@ import { MetaDataDefinitionContext } from "./PacketDslParser";
 import { LengthFieldDeclarationContext } from "./PacketDslParser";
 import { CheckSumFieldDeclarationContext } from "./PacketDslParser";
 import { FieldAttributeContext } from "./PacketDslParser";
-import { LengthOfAttributeContext } from "./PacketDslParser";
 import { CalculatedFromAttributeContext } from "./PacketDslParser";
+import { LengthOfAttributeContext } from "./PacketDslParser";
 import { PaddingAttributeContext } from "./PacketDslParser";
 import { MetaDataDeclarationContext } from "./PacketDslParser";
 import { ValueContext } from "./PacketDslParser";
@@ -225,17 +225,6 @@ export interface PacketDslListener extends ParseTreeListener {
 	exitFieldAttribute?: (ctx: FieldAttributeContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `PacketDslParser.lengthOfAttribute`.
-	 * @param ctx the parse tree
-	 */
-	enterLengthOfAttribute?: (ctx: LengthOfAttributeContext) => void;
-	/**
-	 * Exit a parse tree produced by `PacketDslParser.lengthOfAttribute`.
-	 * @param ctx the parse tree
-	 */
-	exitLengthOfAttribute?: (ctx: LengthOfAttributeContext) => void;
-
-	/**
 	 * Enter a parse tree produced by `PacketDslParser.calculatedFromAttribute`.
 	 * @param ctx the parse tree
 	 */
@@ -245,6 +234,17 @@ export interface PacketDslListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitCalculatedFromAttribute?: (ctx: CalculatedFromAttributeContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `PacketDslParser.lengthOfAttribute`.
+	 * @param ctx the parse tree
+	 */
+	enterLengthOfAttribute?: (ctx: LengthOfAttributeContext) => void;
+	/**
+	 * Exit a parse tree produced by `PacketDslParser.lengthOfAttribute`.
+	 * @param ctx the parse tree
+	 */
+	exitLengthOfAttribute?: (ctx: LengthOfAttributeContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `PacketDslParser.paddingAttribute`.

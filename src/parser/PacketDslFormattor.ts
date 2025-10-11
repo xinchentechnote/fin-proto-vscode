@@ -116,7 +116,7 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
         lines.push(addIdent4ln("@calculatedFrom(" + fwa.calculatedFromAttribute()?._from.text + ")"));
       }
       if (fwa.paddingAttribute()) {
-        lines.push(addIdent4ln("@" + fwa.paddingAttribute()?._dir.text + "Padding(" + fwa.paddingAttribute()?._padding.text + ")"));
+        lines.push(addIdent4ln(fwa.paddingAttribute()?.PADDING_ATTR().text + "(" + fwa.paddingAttribute()?._padding.text + ")"));
       }
     }
     return lines.join('');
