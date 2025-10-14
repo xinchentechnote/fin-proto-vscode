@@ -2,12 +2,14 @@ import { ANTLRErrorListener, Token } from "antlr4ts";
 
 let options: Map<string, Set<string>>;
 options = new Map<string, Set<string>>();
-options.set("StringPreFixLenType", new Set(["u8", "u16", "u32", "u64"]));
-options.set("RepeatPreFixSizeType", new Set(["u8", "u16", "u32", "u64"]));
+options.set("StringPrefixLenType", new Set(["u8", "u16", "u32", "u64"]));
+options.set("ArrayPrefixLenType", new Set(["u8", "u16", "u32", "u64"]));
 options.set("LittleEndian", new Set(["true", "false"]));
 options.set("JavaPackage", new Set());
 options.set("GoPackage", new Set());
 options.set("GoModule", new Set());
+options.set("FixedStringPadFromLeft", new Set(["true", "false"]));
+options.set("FixedStringPadChar", new Set(["\'0\'", "\' \'"]));
 
 const basicTypes = new Set<string>([
   "char", "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64", "f32", "f64", "string",
@@ -155,7 +157,7 @@ export class BinaryModel {
               new DslSyntaxError(pair.line, pair.startIndex, pair.stopIndex, `Duplicate match key: ${pair.key} in field ${field.name} of packet ${packet.name}`)
             );
           } else {
-            if(!this.packetMaps.has(pair.value)) {
+            if (!this.packetMaps.has(pair.value)) {
               this.addSyntaxError(
                 new DslSyntaxError(pair.line, pair.startIndex, pair.stopIndex, `Unknown match value: ${pair.value} in field ${field.name} of packet ${packet.name}`)
               );
