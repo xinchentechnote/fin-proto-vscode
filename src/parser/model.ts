@@ -110,6 +110,9 @@ export class BinaryModel {
       if (basicTypes.has(field.type)) {
         continue;
       }
+      if (field.type.startsWith("zchar[") && field.type.endsWith("]")) {
+        continue;
+      }
       if (field.type.startsWith("char[") && field.type.endsWith("]")) {
         continue;
       }

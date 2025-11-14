@@ -22,6 +22,7 @@ import { FieldAttributeContext } from "./PacketDslParser";
 import { CalculatedFromAttributeContext } from "./PacketDslParser";
 import { LengthOfAttributeContext } from "./PacketDslParser";
 import { PaddingAttributeContext } from "./PacketDslParser";
+import { TagAttributeContext } from "./PacketDslParser";
 import { MetaDataDeclarationContext } from "./PacketDslParser";
 import { ValueContext } from "./PacketDslParser";
 import { TypeContext } from "./PacketDslParser";
@@ -177,6 +178,13 @@ export interface PacketDslVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitPaddingAttribute?: (ctx: PaddingAttributeContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `PacketDslParser.tagAttribute`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTagAttribute?: (ctx: TagAttributeContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `PacketDslParser.metaDataDeclaration`.

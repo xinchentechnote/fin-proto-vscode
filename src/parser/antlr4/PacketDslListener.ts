@@ -22,6 +22,7 @@ import { FieldAttributeContext } from "./PacketDslParser";
 import { CalculatedFromAttributeContext } from "./PacketDslParser";
 import { LengthOfAttributeContext } from "./PacketDslParser";
 import { PaddingAttributeContext } from "./PacketDslParser";
+import { TagAttributeContext } from "./PacketDslParser";
 import { MetaDataDeclarationContext } from "./PacketDslParser";
 import { ValueContext } from "./PacketDslParser";
 import { TypeContext } from "./PacketDslParser";
@@ -256,6 +257,17 @@ export interface PacketDslListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitPaddingAttribute?: (ctx: PaddingAttributeContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `PacketDslParser.tagAttribute`.
+	 * @param ctx the parse tree
+	 */
+	enterTagAttribute?: (ctx: TagAttributeContext) => void;
+	/**
+	 * Exit a parse tree produced by `PacketDslParser.tagAttribute`.
+	 * @param ctx the parse tree
+	 */
+	exitTagAttribute?: (ctx: TagAttributeContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `PacketDslParser.metaDataDeclaration`.
