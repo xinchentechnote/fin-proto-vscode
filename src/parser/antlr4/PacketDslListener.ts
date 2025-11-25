@@ -24,8 +24,12 @@ import { LengthOfAttributeContext } from "./PacketDslParser";
 import { PaddingAttributeContext } from "./PacketDslParser";
 import { TagAttributeContext } from "./PacketDslParser";
 import { MetaDataDeclarationContext } from "./PacketDslParser";
+import { RefMetaDataDeclarationContext } from "./PacketDslParser";
 import { ValueContext } from "./PacketDslParser";
 import { TypeContext } from "./PacketDslParser";
+import { BasicTypeContext } from "./PacketDslParser";
+import { FixedStringContext } from "./PacketDslParser";
+import { DynamicStringContext } from "./PacketDslParser";
 import { MatchFieldDeclarationContext } from "./PacketDslParser";
 import { MatchPairContext } from "./PacketDslParser";
 import { InerObjectDeclarationContext } from "./PacketDslParser";
@@ -281,6 +285,17 @@ export interface PacketDslListener extends ParseTreeListener {
 	exitMetaDataDeclaration?: (ctx: MetaDataDeclarationContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `PacketDslParser.refMetaDataDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	enterRefMetaDataDeclaration?: (ctx: RefMetaDataDeclarationContext) => void;
+	/**
+	 * Exit a parse tree produced by `PacketDslParser.refMetaDataDeclaration`.
+	 * @param ctx the parse tree
+	 */
+	exitRefMetaDataDeclaration?: (ctx: RefMetaDataDeclarationContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `PacketDslParser.value`.
 	 * @param ctx the parse tree
 	 */
@@ -301,6 +316,39 @@ export interface PacketDslListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitType?: (ctx: TypeContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `PacketDslParser.basicType`.
+	 * @param ctx the parse tree
+	 */
+	enterBasicType?: (ctx: BasicTypeContext) => void;
+	/**
+	 * Exit a parse tree produced by `PacketDslParser.basicType`.
+	 * @param ctx the parse tree
+	 */
+	exitBasicType?: (ctx: BasicTypeContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `PacketDslParser.fixedString`.
+	 * @param ctx the parse tree
+	 */
+	enterFixedString?: (ctx: FixedStringContext) => void;
+	/**
+	 * Exit a parse tree produced by `PacketDslParser.fixedString`.
+	 * @param ctx the parse tree
+	 */
+	exitFixedString?: (ctx: FixedStringContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `PacketDslParser.dynamicString`.
+	 * @param ctx the parse tree
+	 */
+	enterDynamicString?: (ctx: DynamicStringContext) => void;
+	/**
+	 * Exit a parse tree produced by `PacketDslParser.dynamicString`.
+	 * @param ctx the parse tree
+	 */
+	exitDynamicString?: (ctx: DynamicStringContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `PacketDslParser.matchFieldDeclaration`.

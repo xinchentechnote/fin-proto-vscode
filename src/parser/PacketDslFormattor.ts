@@ -213,7 +213,7 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
     if (ctx.REPEAT()) {
       repeat = 'repeat ';
     }
-    lines.push(repeat + ctx.IDENTIFIER().text + (ctx.COMMA()?.text ?? ''));
+    lines.push(repeat + ctx._ftype.text + " " + ctx._fname.text + (ctx.COMMA()?.text ?? ''));
     lines.push(this.getHiddenRightAtSameLine(ctx.stop));
     return lines.join('');
   }

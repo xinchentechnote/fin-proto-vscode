@@ -24,8 +24,12 @@ import { LengthOfAttributeContext } from "./PacketDslParser";
 import { PaddingAttributeContext } from "./PacketDslParser";
 import { TagAttributeContext } from "./PacketDslParser";
 import { MetaDataDeclarationContext } from "./PacketDslParser";
+import { RefMetaDataDeclarationContext } from "./PacketDslParser";
 import { ValueContext } from "./PacketDslParser";
 import { TypeContext } from "./PacketDslParser";
+import { BasicTypeContext } from "./PacketDslParser";
+import { FixedStringContext } from "./PacketDslParser";
+import { DynamicStringContext } from "./PacketDslParser";
 import { MatchFieldDeclarationContext } from "./PacketDslParser";
 import { MatchPairContext } from "./PacketDslParser";
 import { InerObjectDeclarationContext } from "./PacketDslParser";
@@ -194,6 +198,13 @@ export interface PacketDslVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitMetaDataDeclaration?: (ctx: MetaDataDeclarationContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by `PacketDslParser.refMetaDataDeclaration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitRefMetaDataDeclaration?: (ctx: RefMetaDataDeclarationContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by `PacketDslParser.value`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -206,6 +217,27 @@ export interface PacketDslVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitType?: (ctx: TypeContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `PacketDslParser.basicType`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitBasicType?: (ctx: BasicTypeContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `PacketDslParser.fixedString`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitFixedString?: (ctx: FixedStringContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `PacketDslParser.dynamicString`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitDynamicString?: (ctx: DynamicStringContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `PacketDslParser.matchFieldDeclaration`.

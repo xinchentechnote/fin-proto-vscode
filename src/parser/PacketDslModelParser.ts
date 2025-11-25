@@ -75,7 +75,7 @@ export class PacketDslModelParser
         continue;
       }
       for (const fwa of fwas) {
-        if (fwa instanceof LengthOfAttributeContext){
+        if (fwa instanceof LengthOfAttributeContext) {
           field.lengthOfField = fwa._from.text;
         }
         if (fwa instanceof CalculatedFromAttributeContext) {
@@ -96,9 +96,10 @@ export class PacketDslModelParser
   visitFieldDefinition(ctx: FieldDefinitionContext): Field | undefined {
     let field: Field;
     if (ctx instanceof ObjectFieldContext) {
-      const name = ctx.IDENTIFIER().text;
+      let type = ctx._ftype.text || "";
+      const name = ctx._fname?.text ?? type;
       const isRepeat = !!ctx.REPEAT();
-      const type = this.model.getMetaDataType(name) || name;
+      type = this.model.getMetaDataType(name) || name;
       field = new Field(name, type, undefined, isRepeat);
     } else if (ctx instanceof InerObjectFieldContext) {
       field = this.visitInerObjectField(ctx);
