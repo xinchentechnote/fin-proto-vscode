@@ -126,6 +126,9 @@ export class PacketDslModelParser
       const type = this.model.getMetaDataType(ftype) || ftype;
       field = new Field(name, type, undefined, isRepeat);
       nameToken = ctx._fname ?? ctx._ftype;
+      field.declaredType = ftype;
+      field.typeLine = ctx._ftype.line;
+      field.typeCol = ctx._ftype.charPositionInLine;
     } else if (ctx instanceof InerObjectFieldContext) {
       field = this.visitInerObjectField(ctx);
       nameToken = ctx.inerObjectDeclaration().IDENTIFIER().symbol;
@@ -144,6 +147,9 @@ export class PacketDslModelParser
     } else if (ctx instanceof MatchFieldContext) {
       field = this.visitMatchFieldDeclaration(ctx.matchFieldDeclaration()!);
       nameToken = ctx.matchFieldDeclaration()!._matchName;
+      const matchKeyToken = ctx.matchFieldDeclaration()!._matchKey;
+      field.matchKeyLine = matchKeyToken.line;
+      field.matchKeyCol = matchKeyToken.charPositionInLine;
     } else {
       this.model.addSyntaxError(
         new DslSyntaxError(ctx.start.line, ctx.start.charPositionInLine, ctx.start.charPositionInLine + 1, `Unknown FieldDefinitionContext type: ${ctx.constructor.name}`)
@@ -221,30 +227,39 @@ export class PacketDslModelParser
   visitMatchPair(ctx: MatchPairContext): MatchPair[] {
     const val = ctx.IDENTIFIER().text;
     const pairs: MatchPair[] = [];
+    const valueToken = ctx.IDENTIFIER().symbol;
     let position: [number, number, number];
     if (ctx.DIGITS()) {
       position = this.parsePosition(ctx.DIGITS()?.symbol);
       pairs.push(new MatchPair(ctx.DIGITS()!.text, val,
         position[0],
         position[1],
-        position[2]));
+        position[2],
+        valueToken.line,
+        valueToken.charPositionInLine));
     } else if (ctx.STRING()) {
       position = this.parsePosition(ctx.STRING()?.symbol);
       pairs.push(new MatchPair(ctx.STRING()!.text, val, position[0],
         position[1],
-        position[2]));
+        position[2],
+        valueToken.line,
+        valueToken.charPositionInLine));
     } else if (ctx.list()) {
       for (const d of ctx.list()!.DIGITS()) {
         position = this.parsePosition(d.symbol);
         pairs.push(new MatchPair(d.text, val, position[0],
           position[1],
-          position[2]));
+          position[2],
+          valueToken.line,
+          valueToken.charPositionInLine));
       }
       for (const s of ctx.list()!.STRING()) {
         position = this.parsePosition(s.symbol);
         pairs.push(new MatchPair(s.text, val, position[0],
           position[1],
-          position[2]));
+          position[2],
+          valueToken.line,
+          valueToken.charPositionInLine));
       }
     }
     return pairs;
@@ -274,11 +289,11 @@ export class PacketDslModelParser
       this.addMetaData(dec._name, dec.type()?.text || "", dec.STRING_LITERAL()?.text, dec.start, dec.stop);
     }
     for (const ref of ctx.refMetaDataDeclaration()) {
-      this.addMetaData(ref._name, ref._typ?.text ?? "", ref.STRING_LITERAL()?.text, ref.start, ref.stop);
+      this.addMetaData(ref._name, ref._typ?.text ?? "", ref.STRING_LITERAL()?.text, ref.start, ref.stop, ref._typ);
     }
   }
 
-  private addMetaData(nameToken: Token, type: string, docLiteral: string | undefined, start: Token, stop: Token | undefined): void {
+  private addMetaData(nameToken: Token, type: string, docLiteral: string | undefined, start: Token, stop: Token | undefined, typeToken?: Token): void {
     const metadata = new MetaData(
       nameToken.text ?? "",
       type,
@@ -288,7 +303,9 @@ export class PacketDslModelParser
       start.charPositionInLine,
       start.charPositionInLine + (stop?.stopIndex ?? start.startIndex + 1) - start.startIndex,
       nameToken.line,
-      nameToken.charPositionInLine
+      nameToken.charPositionInLine,
+      typeToken?.line ?? 0,
+      typeToken?.charPositionInLine ?? 0
     );
     this.model.addMetaData(metadata);
   }

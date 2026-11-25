@@ -184,6 +184,159 @@ function stripCommentsAndStrings(line: string): string {
   return out;
 }
 
+export interface EditSpan {
+  /** 1-based line of the occurrence */
+  line: number;
+  /** 0-based column of the occurrence */
+  col: number;
+  length: number;
+}
+
+/**
+ * Compute every occurrence that must change when renaming the symbol under
+ * the cursor. References are derived from the model (exact token positions),
+ * plus attribute arguments scanned from the raw text:
+ * - packet   -> declaration + match pair values
+ * - field    -> declaration + match key usages + @lengthOf/@calculatedFrom args
+ * - meta/blk -> declaration + declared-type identifiers of fields and meta entries
+ */
+export function computeRename(model: BinaryModel, text: string, oldName: string, newName: string, cursorLine: number): EditSpan[] {
+  if (!isValidIdentifier(oldName) || !isValidIdentifier(newName)) {
+    return [];
+  }
+  const target = resolveDefinition(model, oldName, cursorLine);
+  if (!target) {
+    return [];
+  }
+  const spans: EditSpan[] = [{ line: target.line, col: target.col, length: oldName.length }];
+
+  if (target.kind === 'packet') {
+    forEachMatchPair(model, (pair, _field) => {
+      if (pair.value === oldName && pair.valueLine > 0) {
+        spans.push({ line: pair.valueLine, col: pair.valueCol, length: oldName.length });
+      }
+    });
+  } else if (target.kind === 'field') {
+    for (const pkt of model.packets) {
+      for (const f of pkt.fields) {
+        if (f.type === 'match' && f.matchType === oldName && f.matchKeyLine > 0) {
+          spans.push({ line: f.matchKeyLine, col: f.matchKeyCol, length: oldName.length });
+        }
+      }
+    }
+    spans.push(...findAttributeArgReferences(text, oldName));
+  } else {
+    // metaBlock or meta entry: rename declared-type identifier references
+    forEachFieldDeep(model, f => {
+      if (f.declaredType === oldName && f.typeLine > 0) {
+        spans.push({ line: f.typeLine, col: f.typeCol, length: oldName.length });
+      }
+    });
+    for (const meta of model.metaDataMap.values()) {
+      if (meta.type === oldName && meta.typeLine > 0) {
+        spans.push({ line: meta.typeLine, col: meta.typeCol, length: oldName.length });
+      }
+    }
+  }
+  return dedupeSpans(spans);
+}
+
+function isValidIdentifier(name: string): boolean {
+  return /^[A-Za-z_][A-Za-z_0-9]*$/.test(name);
+}
+
+function forEachMatchPair(model: BinaryModel, fn: (pair: import('./model').MatchPair, field: Field) => void): void {
+  for (const pkt of model.packets) {
+    forEachFieldDeepInPacket(pkt, f => {
+      if (f.type === 'match') {
+        for (const pair of f.matchPairs) {
+          fn(pair, f);
+        }
+      }
+    });
+  }
+}
+
+function forEachFieldDeep(model: BinaryModel, fn: (f: Field) => void): void {
+  for (const pkt of model.packets) {
+    forEachFieldDeepInPacket(pkt, fn);
+  }
+}
+
+function forEachFieldDeepInPacket(packet: Packet, fn: (f: Field) => void): void {
+  const walk = (fields: Field[]) => {
+    for (const f of fields) {
+      fn(f);
+      if (f.inerObject) {
+        walk(f.inerObject.fields);
+      }
+    }
+  };
+  walk(packet.fields);
+}
+
+function findAttributeArgReferences(text: string, oldName: string): EditSpan[] {
+  const spans: EditSpan[] = [];
+  const lineStarts = computeLineStarts(text);
+  const offsetToSpan = (offset: number, length: number): EditSpan => {
+    let line = 0;
+    while (line + 1 < lineStarts.length && lineStarts[line + 1] <= offset) {
+      line++;
+    }
+    return { line: line + 1, col: offset - lineStarts[line], length };
+  };
+
+  const lengthOfRe = /@lengthOf\s*\(\s*([A-Za-z_][A-Za-z_0-9]*)\s*\)/g;
+  let m: RegExpExecArray | null;
+  while ((m = lengthOfRe.exec(text)) !== null) {
+    if (m[1] === oldName) {
+      const argOffset = m.index + m[0].indexOf(m[1]);
+      spans.push(offsetToSpan(argOffset, oldName.length));
+    }
+  }
+
+  const calcRe = /@calculatedFrom\s*\(\s*"([^"]*)"\s*\)/g;
+  while ((m = calcRe.exec(text)) !== null) {
+    const listOffset = m.index + m[0].indexOf(m[1]);
+    let searchFrom = 0;
+    for (;;) {
+      const rel = m[1].indexOf(oldName, searchFrom);
+      if (rel < 0) {
+        break;
+      }
+      const before = rel === 0 || !/[A-Za-z_0-9]/.test(m[1][rel - 1]);
+      const after = rel + oldName.length >= m[1].length || !/[A-Za-z_0-9]/.test(m[1][rel + oldName.length]);
+      if (before && after) {
+        spans.push(offsetToSpan(listOffset + rel, oldName.length));
+      }
+      searchFrom = rel + 1;
+    }
+  }
+  return spans;
+}
+
+function computeLineStarts(text: string): number[] {
+  const starts = [0];
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === '\n') {
+      starts.push(i + 1);
+    }
+  }
+  return starts;
+}
+
+function dedupeSpans(spans: EditSpan[]): EditSpan[] {
+  const seen = new Set<string>();
+  return spans.filter(s => {
+    const key = `${s.line}:${s.col}`;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+}
+
 function findPacketAtLine(model: BinaryModel, line: number): Packet | undefined {
   let current: Packet | undefined;
   for (const pkt of model.packets) {

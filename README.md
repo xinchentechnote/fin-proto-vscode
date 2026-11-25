@@ -13,10 +13,13 @@ FinProto VSCode Extension — 为金融二进制协议 DSL（PacketDSL）提供 
   - 未知 option / option 非法取值、循环 MetaData 引用
 - **代码补全**：关键字、内建类型、字段属性、已定义的 MetaData 块/字段/packet 名称；`@lengthOf(...)`、`@calculatedFrom("...")` 参数位置补全当前 packet 的字段名；`options {}` 块内补全 option 名与合法取值；`match` 块内补全 packet 名。
 - **代码导航**：
-  - 跳转定义（F12）：字段引用 → 字段声明（含 `@lengthOf`/`@calculatedFrom` 参数）、MetaData 块/成员引用 → 定义处、`match` 分派目标 → packet 定义；
+  - 跳转定义（F12）：字段引用 → 字段声明（含 `@lengthOf`/`@calculatedFrom` 参数）、MetaData 块/成员引用 → 定义处、`match` 分派目标 → packet 定义；当前文件没有定义时回退到工作区其它 `.pdsl`/`.dsl` 文件；
+  - 工作区符号搜索（Ctrl+T）：跨所有 workspace 内 DSL 文件搜索 packet / MetaData / meta 成员；
   - 大纲（Outline / Ctrl+Shift+O）：packet、MetaData 块、options 及嵌套字段、match 分派项；
   - 代码折叠：所有 `{...}` 块（packet / MetaData / match / 内嵌对象）。
 - **悬停提示**：悬停在名称上显示类型、属性与描述摘要。
+- **重命名重构**（F2）：字段（含 `@lengthOf`、`@calculatedFrom` 参数、match key 引用）、packet（含 match 分派值引用）、MetaData 块/成员（含声明类型引用）。
+- **区域格式化**：选中部分 DSL 后 Format Selection（Ctrl+K Ctrl+F），只重排选中的顶层块，不影响其它内容。
 - **代码片段**：`packet` / `rpacket` / `metadata` / `match` / `options` / `lengthof` / `checksum` / `zchar` 等模板。
 - **编译**：命令 `fin-proto:compile` 调用 [fin-protoc](https://github.com/xinchentechnote/fin-protoc) CLI，将当前 DSL 编译为 Go / Java / Rust / Lua / Python / C++。
 

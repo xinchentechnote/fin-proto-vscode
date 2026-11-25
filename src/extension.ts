@@ -2,11 +2,12 @@ import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { formatDsl } from './parser/PacketDslFormattor';
+import { formatDsl, formatDslSegments } from './parser/PacketDslFormattor';
 import { parsePacketDsl } from './parser/PacketDslModelParser';
 import { computeCompletions, snippetBodies, DslCompletionItem } from './parser/PacketDslCompletion';
 import { BinaryModel } from './parser/model';
-import { buildDocumentSymbols, computeFoldingRanges, resolveDefinition, FlatSymbol } from './parser/PacketDslNavigation';
+import { buildDocumentSymbols, computeFoldingRanges, resolveDefinition, computeRename, FlatSymbol } from './parser/PacketDslNavigation';
+import { WorkspaceIndex } from './parser/WorkspaceIndex';
 
 const PACKETDSL = { language: 'packetdsl' };
 const DIAGNOSTIC_DEBOUNCE_MS = 300;
@@ -26,6 +27,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// parsed models keyed by document uri, reused by completions between edits
 	const modelCache = new Map<string, { version: number; model: BinaryModel }>();
+	// workspace-wide index feeding symbol search and cross-file navigation
+	const workspaceIndex = new WorkspaceIndex();
 
 	const getModel = (document: vscode.TextDocument): BinaryModel => {
 		const cached = modelCache.get(document.uri.toString());
@@ -101,6 +104,7 @@ export function activate(context: vscode.ExtensionContext) {
 				return;
 			}
 			const model = getModel(document);
+			workspaceIndex.update(key, model);
 			const diagnostics = model.syntaxErrors.map(error =>
 				new vscode.Diagnostic(
 					new vscode.Range(new vscode.Position(error.line - 1, error.startIndex), new vscode.Position(error.line - 1, error.stopIndex)),
@@ -149,15 +153,26 @@ export function activate(context: vscode.ExtensionContext) {
 				const word = document.getText(wordRange);
 				const model = getModel(document);
 				const target = resolveDefinition(model, word, position.line + 1);
-				if (!target) {
-					return [];
+				if (target) {
+					return [
+						new vscode.Location(
+							document.uri,
+							new vscode.Range(new vscode.Position(target.line - 1, target.col), new vscode.Position(target.line - 1, target.col + target.name.length))
+						)
+					];
 				}
-				return [
-					new vscode.Location(
-						document.uri,
-						new vscode.Range(new vscode.Position(target.line - 1, target.col), new vscode.Position(target.line - 1, target.col + target.name.length))
-					)
-				];
+				// fallback: the name may be defined in another workspace file
+				const external = workspaceIndex.resolveInWorkspace(word, document.uri.toString());
+				if (external) {
+					const t = external.target;
+					return [
+						new vscode.Location(
+							vscode.Uri.parse(external.uri),
+							new vscode.Range(new vscode.Position(t.line - 1, t.col), new vscode.Position(t.line - 1, t.col + t.name.length))
+						)
+					];
+				}
+				return [];
 			}
 		}),
 		vscode.languages.registerHoverProvider(PACKETDSL, {
@@ -193,8 +208,74 @@ export function activate(context: vscode.ExtensionContext) {
 					new vscode.FoldingRange(r.startLine, r.endLine)
 				);
 			}
+		}),
+		vscode.languages.registerDocumentRangeFormattingEditProvider(PACKETDSL, {
+			provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range): vscode.TextEdit[] {
+				return formatDslSegments(document.getText(), range.start.line, range.end.line).map(segment =>
+					vscode.TextEdit.replace(
+						new vscode.Range(document.positionAt(segment.startOffset), document.positionAt(segment.endOffset)),
+						segment.text
+					)
+				);
+			}
+		}),
+		vscode.languages.registerRenameProvider(PACKETDSL, {
+			prepareRename(document: vscode.TextDocument, position: vscode.Position): { range: vscode.Range; placeholder: string } {
+				const wordRange = document.getWordRangeAtPosition(position);
+				const word = wordRange ? document.getText(wordRange) : '';
+				const model = getModel(document);
+				const target = resolveDefinition(model, word, position.line + 1);
+				if (!wordRange || !target) {
+					throw new Error(`"${word || '当前位置'}" 不可重命名：未解析到定义`);
+				}
+				return { range: wordRange, placeholder: word };
+			},
+			provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string): vscode.WorkspaceEdit {
+				if (!/^[A-Za-z_][A-Za-z_0-9]*$/.test(newName)) {
+					throw new Error('新名称必须是合法标识符（字母/数字/下划线）');
+				}
+				const wordRange = document.getWordRangeAtPosition(position);
+				const word = wordRange ? document.getText(wordRange) : '';
+				const model = getModel(document);
+				const spans = computeRename(model, document.getText(), word, newName, position.line + 1);
+				if (spans.length === 0) {
+					throw new Error(`无法解析 "${word}" 的定义，无法重命名`);
+				}
+				const edit = new vscode.WorkspaceEdit();
+				for (const span of spans) {
+					edit.replace(
+						document.uri,
+						new vscode.Range(new vscode.Position(span.line - 1, span.col), new vscode.Position(span.line - 1, span.col + span.length)),
+						newName
+					);
+				}
+				return edit;
+			}
+		}),
+		vscode.languages.registerWorkspaceSymbolProvider({
+			provideWorkspaceSymbols(query: string): vscode.SymbolInformation[] {
+				return workspaceIndex.searchSymbols(query).map(hit =>
+					new vscode.SymbolInformation(
+						hit.name,
+						workspaceSymbolKind(hit.kind),
+						hit.detail,
+						new vscode.Location(
+							vscode.Uri.parse(hit.uri),
+							new vscode.Range(new vscode.Position(hit.line - 1, hit.col), new vscode.Position(hit.line - 1, hit.col + hit.name.length))
+						)
+					)
+				);
+			}
 		})
 	);
+
+	// index every packetdsl file already in the workspace so symbol search
+	// works before any file is opened
+	vscode.workspace.findFiles('**/*.{pdsl,dsl}', '**/node_modules/**').then(uris => {
+		for (const uri of uris) {
+			vscode.workspace.openTextDocument(uri).then(doc => scheduleParse(doc));
+		}
+	});
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('fin-proto-vscode.compile', () => compileActiveDocument(outputChannel))
@@ -224,6 +305,14 @@ function symbolKind(kind: FlatSymbol['kind']): vscode.SymbolKind {
 		case 'matchPair': return vscode.SymbolKind.EnumMember;
 		case 'innerObject': return vscode.SymbolKind.Object;
 		case 'options': return vscode.SymbolKind.Namespace;
+		default: return vscode.SymbolKind.Field;
+	}
+}
+
+function workspaceSymbolKind(kind: 'packet' | 'metaBlock' | 'meta'): vscode.SymbolKind {
+	switch (kind) {
+		case 'packet': return vscode.SymbolKind.Class;
+		case 'metaBlock': return vscode.SymbolKind.Struct;
 		default: return vscode.SymbolKind.Field;
 	}
 }

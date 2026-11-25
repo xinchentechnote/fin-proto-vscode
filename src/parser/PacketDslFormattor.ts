@@ -343,3 +343,59 @@ export function formatDsl(dsl: string): string {
   const formatter = new PacketDslFormattor(tokenStream);
   return formatter.visitPacket(tree);
 }
+
+export interface FormatSegment {
+  /** char offset of the first token of the top-level element */
+  startOffset: number;
+  /** char offset one past the last token of the element */
+  endOffset: number;
+  text: string;
+}
+
+/**
+ * Format only the top-level elements (packet / MetaData / options) that
+ * overlap the given 0-based line range. Returns one replacement segment per
+ * element; empty when the document has syntax errors.
+ */
+export function formatDslSegments(dsl: string, fromLine: number, toLine: number): FormatSegment[] {
+  const inputStream = CharStreams.fromString(dsl);
+  const lexer = new PacketDslLexer(inputStream);
+  const tokenStream = new CommonTokenStream(lexer);
+  const parser = new PacketDslParser(tokenStream);
+  parser.removeErrorListeners();
+  const collector = new SyntaxErrorCollector();
+  parser.addErrorListener(collector);
+  const tree = parser.packet();
+  if (collector.errors.length > 0) {
+    return [];
+  }
+  const formatter = new PacketDslFormattor(tokenStream);
+  const segments: FormatSegment[] = [];
+  for (const child of tree.children ?? []) {
+    if (!(child instanceof PacketDefinitionContext || child instanceof MetaDataDefinitionContext || child instanceof OptionDefinitionContext)) {
+      continue;
+    }
+    if (!child.stop) {
+      continue;
+    }
+    const startLine = child.start.line - 1;
+    const endLine = child.stop.line - 1;
+    if (endLine < fromLine || startLine > toLine) {
+      continue;
+    }
+    let text: string;
+    if (child instanceof PacketDefinitionContext) {
+      text = formatter.visitPacketDefinition(child);
+    } else if (child instanceof MetaDataDefinitionContext) {
+      text = formatter.visitMetaDataDefinition(child);
+    } else {
+      text = formatter.visitOptionDefinition(child);
+    }
+    segments.push({
+      startOffset: child.start.startIndex,
+      endOffset: child.stop!.stopIndex + 1,
+      text,
+    });
+  }
+  return segments;
+}

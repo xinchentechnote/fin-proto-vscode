@@ -261,7 +261,9 @@ export class MetaData extends Positioned {
     startIndex: number = 0,
     stopIndex: number = 0,
     public nameLine: number = 0,
-    public nameCol: number = 0
+    public nameCol: number = 0,
+    public typeLine: number = 0,
+    public typeCol: number = 0
   ) {
     super(line, startIndex, stopIndex);
   }
@@ -298,7 +300,13 @@ export class Field extends Positioned {
     public paddingAttr?: string,
     public tag?: number,
     public nameLine: number = 0,
-    public nameCol: number = 0
+    public nameCol: number = 0,
+    // raw declared type text and its token position (identifier types only)
+    public declaredType?: string,
+    public typeLine: number = 0,
+    public typeCol: number = 0,
+    public matchKeyLine: number = 0,
+    public matchKeyCol: number = 0
   ) {
     super(line, startIndex, stopIndex);
   }
@@ -309,7 +317,15 @@ export class Field extends Positioned {
 }
 
 export class MatchPair extends Positioned {
-  constructor(public key: string, public value: string, line: number = 0, startIndex: number = 0, stopIndex: number = 0) {
+  constructor(
+    public key: string,
+    public value: string,
+    line: number = 0,
+    startIndex: number = 0,
+    stopIndex: number = 0,
+    public valueLine: number = 0,
+    public valueCol: number = 0
+  ) {
     super(line, startIndex, stopIndex);
   }
 }

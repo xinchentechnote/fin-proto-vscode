@@ -6,6 +6,9 @@ All notable changes to the "fin-proto-vscode" extension will be documented in th
 
 ### Added
 
+- 跨文件支持：工作区符号搜索（Ctrl+T，跨所有 `.pdsl`/`.dsl` 文件搜索 packet/MetaData/meta 成员）、跳转定义的工作区回退、未打开文件的后台索引。
+- 重命名重构（F2）：字段（含 `@lengthOf`/`@calculatedFrom` 参数与 match key 引用）、packet（含 match 分派值引用）、MetaData 块/成员（含声明类型引用）。
+- 区域格式化（Format Selection）：按顶层块（packet/MetaData/options）局部重排，不影响选区外内容。
 - 代码导航：跳转定义（字段 / MetaData 块与成员 / packet / `@lengthOf`、`@calculatedFrom` 目标）、文档大纲（Outline）、代码折叠（FoldingRange）。
 - 悬停提示：名称的类型、属性与描述摘要。
 - 代码补全：关键字、内建类型、字段属性、MetaData 块/字段、packet 名；`@lengthOf`/`@calculatedFrom` 参数补全字段名；`options` 块补全 option 名与取值；`match` 块补全 packet 名。
