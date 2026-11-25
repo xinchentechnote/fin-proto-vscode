@@ -80,4 +80,33 @@ describe('PacketDslFormattor', () => {
     expect(output).toContain('"1" : Limit,');
     expect(output).toContain('"2" : Market,');
   });
+
+  it('formats tag and padding attributes', () => {
+    const input = `
+    packet Tagged {
+      @tag(3)
+      @rightPad('0')
+      char[8] code \`固定长度\`,
+    }`;
+
+    const output = formatDsl(input);
+    expect(output).toContain("@tag(3)");
+    expect(output).toContain("@rightPad('0')");
+    expect(output).toContain('char[8] code');
+  });
+
+  it('formats metadata with referenced metadata', () => {
+    const input = `
+    MetaData PriceType {
+      int64 value \`价格\`,
+    }
+
+    MetaData Quote {
+      PriceType price \`引用\`,
+    }`;
+
+    const output = formatDsl(input);
+    expect(output).toContain('MetaData Quote');
+    expect(output).toContain('PriceType price `引用`,');
+  });
 });

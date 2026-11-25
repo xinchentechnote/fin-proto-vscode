@@ -1,13 +1,11 @@
 import { CharStreams, CommonTokenStream, Token } from 'antlr4ts';
 import { PacketDslLexer } from './antlr4/PacketDslLexer';
 import {
-  CalculatedFromAttributeContext,
   CheckSumFieldContext,
   FieldDefinitionContext,
   InerObjectFieldContext,
   LengthFieldContext,
   LengthFieldDeclarationContext,
-  LengthOfAttributeContext,
   MatchFieldContext,
   MatchFieldDeclarationContext,
   MatchPairContext,
@@ -66,6 +64,7 @@ export class PacketDslModelParser
     const isRoot = !!ctx.ROOT();
     const fields: Field[] = [];
     const matchFields: Record<string, MatchPair[]> = {};
+    let seenLengthOfField = false;
 
     for (const fctxwa of ctx.fieldDefinitionWithAttribute()) {
       const fwas = fctxwa.fieldAttribute();
@@ -75,11 +74,34 @@ export class PacketDslModelParser
         continue;
       }
       for (const fwa of fwas) {
-        if (fwa instanceof LengthOfAttributeContext) {
-          field.lengthOfField = fwa._from.text;
+        const lengthOf = fwa.lengthOfAttribute();
+        if (lengthOf) {
+          field.lengthOfField = lengthOf._from.text;
         }
-        if (fwa instanceof CalculatedFromAttributeContext) {
-          field.checkSumType = fwa._from.text;
+        const calculatedFrom = fwa.calculatedFromAttribute();
+        if (calculatedFrom) {
+          field.checkSumType = calculatedFrom._from.text;
+        }
+        const padding = fwa.paddingAttribute();
+        if (padding) {
+          field.paddingAttr = padding._padding.text;
+        }
+        const tag = fwa.tagAttribute();
+        if (tag) {
+          field.tag = Number(tag.DIGITS()?.text);
+        }
+      }
+      if (field.lengthOfField) {
+        if (!isRoot) {
+          this.model.addSyntaxError(
+            new DslSyntaxError(field.line, field.startIndex, field.stopIndex, `LengthOfField can only be declared in the root packet`)
+          );
+        } else if (seenLengthOfField) {
+          this.model.addSyntaxError(
+            new DslSyntaxError(field.line, field.startIndex, field.stopIndex, `Duplicate LengthOfField declaration`)
+          );
+        } else {
+          seenLengthOfField = true;
         }
       }
       fields.push(field);
@@ -96,10 +118,11 @@ export class PacketDslModelParser
   visitFieldDefinition(ctx: FieldDefinitionContext): Field | undefined {
     let field: Field;
     if (ctx instanceof ObjectFieldContext) {
-      let type = ctx._ftype.text || "";
-      const name = ctx._fname?.text ?? type;
+      const ftype = ctx._ftype.text || "";
+      // resolve the declared type (meta name / packet name), keep _fname as field name
+      const name = ctx._fname?.text ?? ftype;
       const isRepeat = !!ctx.REPEAT();
-      type = this.model.getMetaDataType(name) || name;
+      const type = this.model.getMetaDataType(ftype) || ftype;
       field = new Field(name, type, undefined, isRepeat);
     } else if (ctx instanceof InerObjectFieldContext) {
       field = this.visitInerObjectField(ctx);
@@ -227,22 +250,34 @@ export class PacketDslModelParser
   }
 
   visitMetaDataDefinition(ctx: MetaDataDefinitionContext): void {
-    for (const dec of ctx.metaDataDeclaration()) {
-      const name = dec._name.text ?? "";
-      const type = dec.type()?.text || name;
-      const basicType = type;
-      const description = dec.STRING_LITERAL()?.text || '';
-      const metadata = new MetaData(
-        name,
-        type,
-        basicType,
-        description.slice(1, -1),
-        dec.start.line,
-        dec.start.charPositionInLine,
-        dec.start.charPositionInLine + (dec.stop?.stopIndex ?? dec.start.startIndex + 1) - dec.start.startIndex
+    const nameToken = ctx.IDENTIFIER()?.symbol;
+    if (nameToken) {
+      this.model.addMetaBlock(
+        ctx.IDENTIFIER()!.text,
+        nameToken.line,
+        nameToken.charPositionInLine,
+        nameToken.charPositionInLine + (nameToken.text ?? '').length
       );
-      this.model.addMetaData(metadata);
     }
+    for (const dec of ctx.metaDataDeclaration()) {
+      this.addMetaData(dec._name.text ?? "", dec.type()?.text || "", dec.STRING_LITERAL()?.text, dec.start, dec.stop);
+    }
+    for (const ref of ctx.refMetaDataDeclaration()) {
+      this.addMetaData(ref._name.text ?? "", ref._typ?.text ?? "", ref.STRING_LITERAL()?.text, ref.start, ref.stop);
+    }
+  }
+
+  private addMetaData(name: string, type: string, docLiteral: string | undefined, start: Token, stop: Token | undefined): void {
+    const metadata = new MetaData(
+      name,
+      type,
+      type,
+      (docLiteral ?? '').slice(1, -1),
+      start.line,
+      start.charPositionInLine,
+      start.charPositionInLine + (stop?.stopIndex ?? start.startIndex + 1) - start.startIndex
+    );
+    this.model.addMetaData(metadata);
   }
 
   visitType(_ctx: TypeContext): void {

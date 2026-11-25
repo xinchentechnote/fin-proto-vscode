@@ -23,21 +23,12 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
+      - name: Run unit tests
+        run: yarn test
+
       - name: esbuild
         run: yarn compile
 
-      - name: Install GUI dependencies
-        run: |
-            sudo apt-get update
-            sudo apt-get install -y \
-            libgtk-3-0 libxss1 libasound2t64 libnss3 \
-            libx11-xcb1 libxcomposite1 libxdamage1 \
-            libxrandr2 libgbm1 libxshmfence1 libxrender1 libxtst6 \
-            xvfb
-
-    #   - name: Run VSCode extension tests in headless mode
-    #     run: xvfb-run -a yarn test
-      
       - name: Install vsce
         run: yarn global add vsce
       - name: Package extension

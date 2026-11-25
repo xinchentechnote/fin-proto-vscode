@@ -3,9 +3,8 @@ import { PacketDslVisitor } from './antlr4/PacketDslVisitor';
 import { CharStreams, CommonTokenStream, Token } from 'antlr4ts';
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode';
 import { PacketDslLexer } from './antlr4/PacketDslLexer';
-import { CalculatedFromAttributeContext, CheckSumFieldContext, FieldAttributeContext, InerObjectFieldContext, LengthFieldContext, LengthOfAttributeContext, MatchFieldContext, MatchFieldDeclarationContext, MetaDataDeclarationContext, MetaDataDefinitionContext, MetaFieldContext, ObjectFieldContext, OptionDeclarationContext, OptionDefinitionContext, PacketContext, PacketDefinitionContext, PacketDslParser, PaddingAttributeContext } from './antlr4/PacketDslParser';
+import { CalculatedFromAttributeContext, CheckSumFieldContext, FieldAttributeContext, InerObjectFieldContext, LengthFieldContext, LengthOfAttributeContext, MatchFieldContext, MatchFieldDeclarationContext, MetaDataDeclarationContext, MetaDataDefinitionContext, MetaFieldContext, ObjectFieldContext, OptionDeclarationContext, OptionDefinitionContext, PacketContext, PacketDefinitionContext, PacketDslParser, PaddingAttributeContext, RefMetaDataDeclarationContext, TagAttributeContext } from './antlr4/PacketDslParser';
 import { SyntaxErrorCollector } from './model';
-import { FoldingRange } from 'vscode';
 
 export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
   implements PacketDslVisitor<string> {
@@ -118,6 +117,9 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
       if (fwa.paddingAttribute()) {
         lines.push(addIdent4ln(fwa.paddingAttribute()?.PADDING_ATTR().text + "(" + fwa.paddingAttribute()?._padding.text + ")"));
       }
+      if (fwa.tagAttribute()) {
+        lines.push(addIdent4ln("@tag(" + fwa.tagAttribute()?.DIGITS()?.text + ")"));
+      }
     }
     return lines.join('');
   }
@@ -175,6 +177,9 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
     for (const decl of ctx.metaDataDeclaration() ?? []) {
       if (decl instanceof MetaDataDeclarationContext) { lines.push('    ' + this.visitMetaDataDeclaration(decl) + '\n'); }
     }
+    for (const ref of ctx.refMetaDataDeclaration() ?? []) {
+      if (ref instanceof RefMetaDataDeclarationContext) { lines.push('    ' + this.visitRefMetaDataDeclaration(ref) + '\n'); }
+    }
     lines.push('}');
     lines.push(this.getHiddenRightAtSameLine(ctx.stop));
     return lines.join('');
@@ -194,13 +199,20 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
     return `${formatted}${lineComment ? lineComment : ''}`;
   }
 
+  visitRefMetaDataDeclaration(ctx: RefMetaDataDeclarationContext): string {
+    let formatted = ctx._typ.text + ' ' + ctx._name.text;
+    if (ctx.STRING_LITERAL()) {
+      formatted += ' ' + ctx.STRING_LITERAL()?.text;
+    }
+    formatted += ',';
+    const lineComment = this.getHiddenRightAtSameLine(ctx.stop);
+    return `${formatted}${lineComment ? lineComment : ''}`;
+  }
+
   visitMetaField(ctx: MetaFieldContext): string {
     const lines: string[] = [];
     lines.push(this.getHiddenLeft(ctx.start));
-    var repeat = "";
-    if (ctx.REPEAT()) {
-      repeat = 'repeat ';
-    }
+    const repeat = ctx.REPEAT() ? 'repeat ' : '';
     lines.push(repeat + this.visitMetaDataDeclaration(ctx.metaDataDeclaration()));
     lines.push(this.getHiddenRightAtSameLine(ctx.stop));
     return lines.join('');
@@ -209,10 +221,7 @@ export class PacketDslFormattor extends AbstractParseTreeVisitor<string>
   visitObjectField(ctx: ObjectFieldContext): string {
     const lines: string[] = [];
     lines.push(this.getHiddenLeft(ctx.start));
-    var repeat = "";
-    if (ctx.REPEAT()) {
-      repeat = 'repeat ';
-    }
+    const repeat = ctx.REPEAT() ? 'repeat ' : '';
     lines.push(repeat + ctx._ftype.text + " " + ctx._fname.text + (ctx.COMMA()?.text ?? ''));
     lines.push(this.getHiddenRightAtSameLine(ctx.stop));
     return lines.join('');

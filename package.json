@@ -7,7 +7,7 @@
     "url": "https://github.com/xinchentechnote/fin-proto-vscode.git"
   },
   "license": "MIT",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.100.0"
   },
@@ -27,6 +27,20 @@
         "title": "fin-proto:compile"
       }
     ],
+    "configuration": {
+      "title": "fin-proto",
+      "properties": {
+        "finProto.protocPath": {
+          "type": "string",
+          "default": "fin-protoc",
+          "description": "fin-protoc 编译器可执行文件路径（默认从 PATH 查找）"
+        },
+        "finProto.outputDir": {
+          "type": "string",
+          "description": "编译产物输出目录，默认为 DSL 文件同级的 gen 目录"
+        }
+      }
+    },
     "grammars": [
       {
         "language": "packetdsl",
@@ -46,6 +60,12 @@
           ".dsl"
         ],
         "configuration": "./language-configuration.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "packetdsl",
+        "path": "./snippets/packetdsl.json"
       }
     ]
   },

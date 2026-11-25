@@ -1,0 +1,69 @@
+{
+  "packet": {
+    "prefix": "packet",
+    "body": [
+      "packet ${1:Name} {",
+      "\tuint32 ${2:id} `${3:description}`,",
+      "}"
+    ],
+    "description": "Packet definition skeleton"
+  },
+  "root packet": {
+    "prefix": "rpacket",
+    "body": [
+      "root packet ${1:Name} {",
+      "\tuint32 ${2:id} `${3:description}`,",
+      "}"
+    ],
+    "description": "Root packet definition skeleton"
+  },
+  "MetaData block": {
+    "prefix": "metadata",
+    "body": [
+      "MetaData ${1:Name} {",
+      "\tuint32 ${2:field} `${3:description}`,",
+      "}"
+    ],
+    "description": "MetaData block skeleton"
+  },
+  "match block": {
+    "prefix": "match",
+    "body": [
+      "match ${1:key} as ${2:Name} {",
+      "\t${3:1} : ${4:PacketA},",
+      "\t${5:2} : ${6:PacketB},",
+      "}"
+    ],
+    "description": "Match dispatch block skeleton"
+  },
+  "options block": {
+    "prefix": "options",
+    "body": [
+      "options {",
+      "\tLittleEndian = ${1|true,false|};",
+      "}"
+    ],
+    "description": "Options block skeleton"
+  },
+  "lengthOf field": {
+    "prefix": "lengthof",
+    "body": [
+      "uint16 ${1:len} @lengthOf(${2:payload}) `${3:description}`,"
+    ],
+    "description": "Length field with @lengthOf attribute"
+  },
+  "checksum field": {
+    "prefix": "checksum",
+    "body": [
+      "uint16 ${1:checksum} @calculatedFrom(\"${2:field1,field2}\") `${3:description}`,"
+    ],
+    "description": "Checksum field with @calculatedFrom attribute"
+  },
+  "string field": {
+    "prefix": "zchar",
+    "body": [
+      "zchar[${1:32}] ${2:name} `${3:description}`,"
+    ],
+    "description": "Fixed-length string field"
+  }
+}

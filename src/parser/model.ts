@@ -16,6 +16,10 @@ const basicTypes = new Set<string>([
   "uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "float32", "float64", "char[]"
 ]);
 
+export function isFixedStringType(type: string): boolean {
+  return (type.startsWith("char[") || type.startsWith("zchar[")) && type.endsWith("]");
+}
+
 export class DslSyntaxError {
   constructor(
     public line: number,
@@ -30,19 +34,23 @@ export class SyntaxErrorCollector implements ANTLRErrorListener<Token> {
 
   syntaxError(
     _recognizer: any,
-    _offendingSymbol: Token | undefined,
+    offendingSymbol: Token | undefined,
     line: number,
     charPositionInLine: number,
     msg: string,
     _e: any
   ): void {
-    this.errors.push(new DslSyntaxError(line, charPositionInLine, charPositionInLine + 1, msg));
+    // span the whole offending token so diagnostics highlight it fully
+    const width = offendingSymbol?.text?.length ?? 1;
+    this.errors.push(new DslSyntaxError(line, charPositionInLine, charPositionInLine + width, msg));
   }
 }
 
 export class BinaryModel {
   rootPacket?: Packet;
   metaDataMap = new Map<string, MetaData>();
+  // MetaData block names act as composite types usable in field declarations
+  metaBlockNames = new Set<string>();
   options = new Map<string, string>();
   packets: Packet[] = [];
   packetMaps = new Map<string, Packet>();
@@ -50,6 +58,16 @@ export class BinaryModel {
 
   addSyntaxError(error: DslSyntaxError) {
     this.syntaxErrors.push(error);
+  }
+
+  addMetaBlock(name: string, line: number, startIndex: number, stopIndex: number) {
+    if (this.metaBlockNames.has(name)) {
+      this.addSyntaxError(
+        new DslSyntaxError(line, startIndex, stopIndex, `Duplicate metadata block definition: ${name}`)
+      );
+      return;
+    }
+    this.metaBlockNames.add(name);
   }
 
   addMetaData(meta: MetaData) {
@@ -110,13 +128,10 @@ export class BinaryModel {
       if (basicTypes.has(field.type)) {
         continue;
       }
-      if (field.type.startsWith("zchar[") && field.type.endsWith("]")) {
+      if (isFixedStringType(field.type)) {
         continue;
       }
-      if (field.type.startsWith("char[") && field.type.endsWith("]")) {
-        continue;
-      }
-      if (this.metaDataMap.has(field.type)) {
+      if (this.metaDataMap.has(field.type) || this.metaBlockNames.has(field.type)) {
         continue;
       }
       if (field.inerObject) {
@@ -127,13 +142,6 @@ export class BinaryModel {
         continue;
       }
       if (field.type === "match") {
-        for (const pair of field.matchPairs) {
-          if (!this.packetMaps.has(pair.value)) {
-            this.addSyntaxError(
-              new DslSyntaxError(pair.line, pair.startIndex, pair.stopIndex, `Unknown match value: ${pair.value} in packet ${packet.name}`)
-            );
-          }
-        }
         continue;
       }
       this.addSyntaxError(
@@ -185,18 +193,27 @@ export class BinaryModel {
       this.validateMetaData(meta[1]);
     }
   }
-  validateMetaData(meta: MetaData | undefined) {
+  validateMetaData(meta: MetaData | undefined, visited: Set<string> = new Set()) {
     if (!meta) {
       return;
     }
-    if (basicTypes.has(meta.type)) {
+    if (basicTypes.has(meta.type) || isFixedStringType(meta.type)) {
       return;
     }
-    if (meta.type.startsWith("char[") && meta.type.endsWith("]")) {
+    if (visited.has(meta.type)) {
+      this.addSyntaxError(
+        new DslSyntaxError(meta.line, meta.startIndex, meta.stopIndex, `Circular metadata reference: ${meta.type}`)
+      );
       return;
     }
-    if (this.metaDataMap.has(meta.type)) {
-      this.validateMetaData(this.metaDataMap.get(meta.type));
+    visited.add(meta.type);
+    // MetaData block names are valid composite types on their own
+    if (this.metaBlockNames.has(meta.type)) {
+      return;
+    }
+    const next = this.metaDataMap.get(meta.type);
+    if (next) {
+      this.validateMetaData(next, visited);
     } else {
       this.addSyntaxError(
         new DslSyntaxError(meta.line, meta.startIndex, meta.stopIndex, `Invalid metadata definition: ${meta.type}`)
@@ -205,7 +222,23 @@ export class BinaryModel {
   }
 
   getMetaDataType(name: string): string | undefined {
-    return this.metaDataMap.get(name)?.basicType;
+    const meta = this.metaDataMap.get(name);
+    if (!meta) {
+      return undefined;
+    }
+    return this.resolveBasicType(meta, new Set([name]));
+  }
+
+  private resolveBasicType(meta: MetaData, visited: Set<string>): string | undefined {
+    if (basicTypes.has(meta.type) || isFixedStringType(meta.type)) {
+      return meta.type;
+    }
+    if (visited.has(meta.type)) {
+      return undefined;
+    }
+    visited.add(meta.type);
+    const next = this.metaDataMap.get(meta.type);
+    return next ? this.resolveBasicType(next, visited) : undefined;
   }
 }
 
@@ -258,7 +291,9 @@ export class Field extends Positioned {
     public matchPairs: MatchPair[] = [],
     line: number = 0,
     startIndex: number = 0,
-    stopIndex: number = 0
+    stopIndex: number = 0,
+    public paddingAttr?: string,
+    public tag?: number
   ) {
     super(line, startIndex, stopIndex);
   }

@@ -2,16 +2,19 @@
     "name": "PacketDsl",
     "patterns": [
         {
+            "include": "#comments"
+        },
+        {
             "include": "#keywords"
+        },
+        {
+            "include": "#attributes"
         },
         {
             "include": "#types"
         },
         {
             "include": "#literals"
-        },
-        {
-            "include": "#comments"
         },
         {
             "include": "#identifiers"
@@ -21,15 +24,23 @@
         "keywords": {
             "patterns": [
                 {
-                    "match": "\\b(root|packet|repeat|MetaData|match|options)\\b",
+                    "match": "\\b(root|packet|repeat|MetaData|match|options|as)\\b",
                     "name": "keyword.control.packetdsl"
+                }
+            ]
+        },
+        "attributes": {
+            "patterns": [
+                {
+                    "match": "@(lengthOf|calculatedFrom|leftPad|rightPad|tag)",
+                    "name": "storage.modifier.packetdsl"
                 }
             ]
         },
         "types": {
             "patterns": [
                 {
-                    "match": "\\b(u?int(8|16|32|64)|i(8|16|32|64)|f32|f64|float32|float64|string|char)\\b",
+                    "match": "\\b(z?char\\[\\d+\\]|z?char|u?int(8|16|32|64)|i(8|16|32|64)|f32|f64|float32|float64|string)\\b",
                     "name": "storage.type.packetdsl"
                 }
             ]
@@ -43,6 +54,10 @@
                 {
                     "match": "`[^`\r\n]*`",
                     "name": "string.quoted.other.packetdsl"
+                },
+                {
+                    "match": "'(0| )'",
+                    "name": "string.quoted.single.packetdsl"
                 },
                 {
                     "match": "\\b\\d+\\b",
