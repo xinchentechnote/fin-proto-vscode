@@ -122,7 +122,7 @@ describe('PacketDslModelParser', () => {
       }
     `;
     const model = parsePacketDsl(dsl);
-    expect(model.metaBlockNames.has('PriceType')).toBe(true);
+    expect(model.metaBlockPositions.has('PriceType')).toBe(true);
 
     const errors = model.syntaxErrors.filter(e => e.msg.includes('Unknown field type'));
     expect(errors).toHaveLength(1);

@@ -6,6 +6,8 @@ All notable changes to the "fin-proto-vscode" extension will be documented in th
 
 ### Added
 
+- 代码导航：跳转定义（字段 / MetaData 块与成员 / packet / `@lengthOf`、`@calculatedFrom` 目标）、文档大纲（Outline）、代码折叠（FoldingRange）。
+- 悬停提示：名称的类型、属性与描述摘要。
 - 代码补全：关键字、内建类型、字段属性、MetaData 块/字段、packet 名；`@lengthOf`/`@calculatedFrom` 参数补全字段名；`options` 块补全 option 名与取值；`match` 块补全 packet 名。
 - 代码片段（snippets）：packet / root packet / MetaData / match / options / lengthOf / checksum / zchar 模板。
 - `fin-proto:compile` 命令接通 fin-protoc CLI，支持多目标语言编译，新增 `finProto.protocPath`、`finProto.outputDir` 配置项。

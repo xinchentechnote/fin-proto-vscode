@@ -49,8 +49,9 @@ export class SyntaxErrorCollector implements ANTLRErrorListener<Token> {
 export class BinaryModel {
   rootPacket?: Packet;
   metaDataMap = new Map<string, MetaData>();
-  // MetaData block names act as composite types usable in field declarations
-  metaBlockNames = new Set<string>();
+  // MetaData block names act as composite types usable in field declarations,
+  // the value is the position of the block name token for navigation
+  metaBlockPositions = new Map<string, { line: number; col: number }>();
   options = new Map<string, string>();
   packets: Packet[] = [];
   packetMaps = new Map<string, Packet>();
@@ -61,13 +62,13 @@ export class BinaryModel {
   }
 
   addMetaBlock(name: string, line: number, startIndex: number, stopIndex: number) {
-    if (this.metaBlockNames.has(name)) {
+    if (this.metaBlockPositions.has(name)) {
       this.addSyntaxError(
         new DslSyntaxError(line, startIndex, stopIndex, `Duplicate metadata block definition: ${name}`)
       );
       return;
     }
-    this.metaBlockNames.add(name);
+    this.metaBlockPositions.set(name, { line, col: startIndex });
   }
 
   addMetaData(meta: MetaData) {
@@ -131,7 +132,7 @@ export class BinaryModel {
       if (isFixedStringType(field.type)) {
         continue;
       }
-      if (this.metaDataMap.has(field.type) || this.metaBlockNames.has(field.type)) {
+      if (this.metaDataMap.has(field.type) || this.metaBlockPositions.has(field.type)) {
         continue;
       }
       if (field.inerObject) {
@@ -208,7 +209,7 @@ export class BinaryModel {
     }
     visited.add(meta.type);
     // MetaData block names are valid composite types on their own
-    if (this.metaBlockNames.has(meta.type)) {
+    if (this.metaBlockPositions.has(meta.type)) {
       return;
     }
     const next = this.metaDataMap.get(meta.type);
@@ -258,7 +259,9 @@ export class MetaData extends Positioned {
     public description: string,
     line: number = 0,
     startIndex: number = 0,
-    stopIndex: number = 0
+    stopIndex: number = 0,
+    public nameLine: number = 0,
+    public nameCol: number = 0
   ) {
     super(line, startIndex, stopIndex);
   }
@@ -293,7 +296,9 @@ export class Field extends Positioned {
     startIndex: number = 0,
     stopIndex: number = 0,
     public paddingAttr?: string,
-    public tag?: number
+    public tag?: number,
+    public nameLine: number = 0,
+    public nameCol: number = 0
   ) {
     super(line, startIndex, stopIndex);
   }

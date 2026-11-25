@@ -6,6 +6,7 @@ import { formatDsl } from './parser/PacketDslFormattor';
 import { parsePacketDsl } from './parser/PacketDslModelParser';
 import { computeCompletions, snippetBodies, DslCompletionItem } from './parser/PacketDslCompletion';
 import { BinaryModel } from './parser/model';
+import { buildDocumentSymbols, computeFoldingRanges, resolveDefinition, FlatSymbol } from './parser/PacketDslNavigation';
 
 const PACKETDSL = { language: 'packetdsl' };
 const DIAGNOSTIC_DEBOUNCE_MS = 300;
@@ -138,12 +139,93 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 			},
 			'@', '='
-		)
+		),
+		vscode.languages.registerDefinitionProvider(PACKETDSL, {
+			provideDefinition(document: vscode.TextDocument, position: vscode.Position): vscode.Location[] {
+				const wordRange = document.getWordRangeAtPosition(position);
+				if (!wordRange) {
+					return [];
+				}
+				const word = document.getText(wordRange);
+				const model = getModel(document);
+				const target = resolveDefinition(model, word, position.line + 1);
+				if (!target) {
+					return [];
+				}
+				return [
+					new vscode.Location(
+						document.uri,
+						new vscode.Range(new vscode.Position(target.line - 1, target.col), new vscode.Position(target.line - 1, target.col + target.name.length))
+					)
+				];
+			}
+		}),
+		vscode.languages.registerHoverProvider(PACKETDSL, {
+			provideHover(document: vscode.TextDocument, position: vscode.Position): vscode.Hover | undefined {
+				const wordRange = document.getWordRangeAtPosition(position);
+				if (!wordRange) {
+					return undefined;
+				}
+				const word = document.getText(wordRange);
+				const model = getModel(document);
+				const target = resolveDefinition(model, word, position.line + 1);
+				if (!target) {
+					return undefined;
+				}
+				const kindLabel = { metaBlock: 'MetaData', meta: 'MetaData 字段', packet: 'Packet', field: 'Field' }[target.kind];
+				const md = new vscode.MarkdownString(`**${kindLabel}** \`${target.name}\``);
+				if (target.detail) {
+					md.appendText(`\n\n${target.detail}`);
+				}
+				return new vscode.Hover(md, wordRange);
+			}
+		}),
+		vscode.languages.registerDocumentSymbolProvider(PACKETDSL, {
+			provideDocumentSymbols(document: vscode.TextDocument): vscode.DocumentSymbol[] {
+				const model = getModel(document);
+				const flat = buildDocumentSymbols(model, document.getText());
+				return flat.map(toDocumentSymbol);
+			}
+		}),
+		vscode.languages.registerFoldingRangeProvider(PACKETDSL, {
+			provideFoldingRanges(document: vscode.TextDocument): vscode.FoldingRange[] {
+				return computeFoldingRanges(document.getText()).map(r =>
+					new vscode.FoldingRange(r.startLine, r.endLine)
+				);
+			}
+		})
 	);
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('fin-proto-vscode.compile', () => compileActiveDocument(outputChannel))
 	);
+}
+
+function toDocumentSymbol(flat: FlatSymbol): vscode.DocumentSymbol {
+	const range = new vscode.Range(new vscode.Position(Math.max(flat.line - 1, 0), flat.col), new vscode.Position(Math.max(flat.line - 1, 0), flat.col + flat.name.length));
+	const symbol = new vscode.DocumentSymbol(
+		flat.name,
+		flat.detail ?? '',
+		symbolKind(flat.kind),
+		range,
+		range
+	);
+	for (const child of flat.children) {
+		symbol.children.push(toDocumentSymbol(child));
+	}
+	return symbol;
+}
+
+function symbolKind(kind: FlatSymbol['kind']): vscode.SymbolKind {
+	switch (kind) {
+		case 'packet': return vscode.SymbolKind.Class;
+		case 'metadata': return vscode.SymbolKind.Struct;
+		case 'match': return vscode.SymbolKind.Enum;
+		case 'matchPair': return vscode.SymbolKind.EnumMember;
+		case 'innerObject': return vscode.SymbolKind.Object;
+		case 'options': return vscode.SymbolKind.Namespace;
+		default: return vscode.SymbolKind.Field;
+	}
 }
 
 function toVscodeCompletionItem(item: DslCompletionItem): vscode.CompletionItem {

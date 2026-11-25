@@ -163,7 +163,7 @@ function prefixFilter(items: DslCompletionItem[], prefix: string): DslCompletion
 
 function metaItems(model: BinaryModel | undefined): DslCompletionItem[] {
   const names = new Set<string>([
-    ...(model?.metaBlockNames ?? []),
+    ...Array.from(model?.metaBlockPositions.keys() ?? []),
     ...Array.from(model?.metaDataMap.keys() ?? []),
   ]);
   return Array.from(names).map(name => ({ label: name, kind: 'metadata' as const }));

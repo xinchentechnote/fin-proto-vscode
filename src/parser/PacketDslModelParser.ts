@@ -117,6 +117,7 @@ export class PacketDslModelParser
 
   visitFieldDefinition(ctx: FieldDefinitionContext): Field | undefined {
     let field: Field;
+    let nameToken: Token | undefined;
     if (ctx instanceof ObjectFieldContext) {
       const ftype = ctx._ftype.text || "";
       // resolve the declared type (meta name / packet name), keep _fname as field name
@@ -124,24 +125,34 @@ export class PacketDslModelParser
       const isRepeat = !!ctx.REPEAT();
       const type = this.model.getMetaDataType(ftype) || ftype;
       field = new Field(name, type, undefined, isRepeat);
+      nameToken = ctx._fname ?? ctx._ftype;
     } else if (ctx instanceof InerObjectFieldContext) {
       field = this.visitInerObjectField(ctx);
+      nameToken = ctx.inerObjectDeclaration().IDENTIFIER().symbol;
     } else if (ctx instanceof LengthFieldContext) {
       field = this.visitLengthField(ctx);
+      nameToken = ctx.lengthFieldDeclaration()._name;
     } else if (ctx instanceof CheckSumFieldContext) {
       field = this.visitCheckSumField(ctx);
+      nameToken = ctx.checkSumFieldDeclaration()._name;
     } else if (ctx instanceof MetaFieldContext) {
       field = this.visitMetaDataDeclaration(ctx.metaDataDeclaration()!);
+      nameToken = ctx.metaDataDeclaration()!._name;
       if (ctx.REPEAT()) {
         field.isRepeat = true;
       }
     } else if (ctx instanceof MatchFieldContext) {
       field = this.visitMatchFieldDeclaration(ctx.matchFieldDeclaration()!);
+      nameToken = ctx.matchFieldDeclaration()!._matchName;
     } else {
       this.model.addSyntaxError(
         new DslSyntaxError(ctx.start.line, ctx.start.charPositionInLine, ctx.start.charPositionInLine + 1, `Unknown FieldDefinitionContext type: ${ctx.constructor.name}`)
       );
       return undefined;
+    }
+    if (nameToken) {
+      field.nameLine = nameToken.line;
+      field.nameCol = nameToken.charPositionInLine;
     }
     field.line = ctx.start.line;
     field.startIndex = ctx.start.charPositionInLine;
@@ -260,22 +271,24 @@ export class PacketDslModelParser
       );
     }
     for (const dec of ctx.metaDataDeclaration()) {
-      this.addMetaData(dec._name.text ?? "", dec.type()?.text || "", dec.STRING_LITERAL()?.text, dec.start, dec.stop);
+      this.addMetaData(dec._name, dec.type()?.text || "", dec.STRING_LITERAL()?.text, dec.start, dec.stop);
     }
     for (const ref of ctx.refMetaDataDeclaration()) {
-      this.addMetaData(ref._name.text ?? "", ref._typ?.text ?? "", ref.STRING_LITERAL()?.text, ref.start, ref.stop);
+      this.addMetaData(ref._name, ref._typ?.text ?? "", ref.STRING_LITERAL()?.text, ref.start, ref.stop);
     }
   }
 
-  private addMetaData(name: string, type: string, docLiteral: string | undefined, start: Token, stop: Token | undefined): void {
+  private addMetaData(nameToken: Token, type: string, docLiteral: string | undefined, start: Token, stop: Token | undefined): void {
     const metadata = new MetaData(
-      name,
+      nameToken.text ?? "",
       type,
       type,
       (docLiteral ?? '').slice(1, -1),
       start.line,
       start.charPositionInLine,
-      start.charPositionInLine + (stop?.stopIndex ?? start.startIndex + 1) - start.startIndex
+      start.charPositionInLine + (stop?.stopIndex ?? start.startIndex + 1) - start.startIndex,
+      nameToken.line,
+      nameToken.charPositionInLine
     );
     this.model.addMetaData(metadata);
   }
