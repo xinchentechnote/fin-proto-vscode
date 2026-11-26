@@ -6,9 +6,10 @@ import { formatDsl, formatDslSegments } from './parser/PacketDslFormattor';
 import { parsePacketDsl } from './parser/PacketDslModelParser';
 import { computeCompletions, snippetBodies, DslCompletionItem } from './parser/PacketDslCompletion';
 import { BinaryModel } from './parser/model';
-import { buildDocumentSymbols, computeFoldingRanges, resolveDefinition, computeRename, FlatSymbol } from './parser/PacketDslNavigation';
+import { buildDocumentSymbols, computeFoldingRanges, resolveDefinition, computeRename, detectRenameCollision, collectReferences, FlatSymbol } from './parser/PacketDslNavigation';
 import { WorkspaceIndex } from './parser/WorkspaceIndex';
 import { parseCompileErrors } from './parser/FinProtocOutput';
+import { buildQuickFixes } from './parser/PacketDslCodeActions';
 
 const PACKETDSL = { language: 'packetdsl' };
 const DIAGNOSTIC_DEBOUNCE_MS = 300;
@@ -202,6 +203,68 @@ export function activate(context: vscode.ExtensionContext) {
 				return new vscode.Hover(md, wordRange);
 			}
 		}),
+		vscode.languages.registerReferenceProvider(PACKETDSL, {
+			provideReferences(document: vscode.TextDocument, position: vscode.Position, context: { includeDeclaration: boolean }): vscode.Location[] {
+				const wordRange = document.getWordRangeAtPosition(position);
+				if (!wordRange) {
+					return [];
+				}
+				const word = document.getText(wordRange);
+				const model = getModel(document);
+				return collectReferences(model, document.getText(), word, position.line + 1)
+					.filter(span => context.includeDeclaration || span.kind !== 'declaration')
+					.map(span =>
+						new vscode.Location(
+							document.uri,
+							new vscode.Range(span.line - 1, span.col, span.line - 1, span.col + span.length)
+						)
+					);
+			}
+		}),
+		vscode.languages.registerDocumentHighlightProvider(PACKETDSL, {
+			provideDocumentHighlights(document: vscode.TextDocument, position: vscode.Position): vscode.DocumentHighlight[] {
+				const wordRange = document.getWordRangeAtPosition(position);
+				if (!wordRange) {
+					return [];
+				}
+				const word = document.getText(wordRange);
+				const model = getModel(document);
+				return collectReferences(model, document.getText(), word, position.line + 1).map(span =>
+					new vscode.DocumentHighlight(
+						new vscode.Range(span.line - 1, span.col, span.line - 1, span.col + span.length)
+					)
+				);
+			}
+		}),
+		vscode.languages.registerCodeActionsProvider(
+			PACKETDSL,
+			{
+				provideCodeActions(document: vscode.TextDocument, _range: vscode.Range, context: vscode.CodeActionContext): vscode.CodeAction[] {
+					const fixes = buildQuickFixes(
+						context.diagnostics.map(d => ({
+							message: d.message,
+							line: d.range.start.line,
+							col: d.range.start.character,
+						})),
+						document.getText()
+					);
+					return fixes.map(fix => {
+						const action = new vscode.CodeAction(fix.title, vscode.CodeActionKind.QuickFix);
+						const edit = new vscode.WorkspaceEdit();
+						for (const e of fix.edits) {
+							edit.replace(
+								document.uri,
+								new vscode.Range(e.startLine, e.startCol, e.endLine, e.endCol),
+								e.newText
+							);
+						}
+						action.edit = edit;
+						return action;
+					});
+				}
+			},
+			{ providedCodeActionKinds: [vscode.CodeActionKind.QuickFix] }
+		),
 		vscode.languages.registerDocumentSymbolProvider(PACKETDSL, {
 			provideDocumentSymbols(document: vscode.TextDocument): vscode.DocumentSymbol[] {
 				const model = getModel(document);
@@ -244,6 +307,10 @@ export function activate(context: vscode.ExtensionContext) {
 				const wordRange = document.getWordRangeAtPosition(position);
 				const word = wordRange ? document.getText(wordRange) : '';
 				const model = getModel(document);
+				const collision = detectRenameCollision(model, word, newName, position.line + 1);
+				if (collision) {
+					throw new Error(collision);
+				}
 				const spans = computeRename(model, document.getText(), word, newName, position.line + 1);
 				if (spans.length === 0) {
 					throw new Error(`无法解析 "${word}" 的定义，无法重命名`);

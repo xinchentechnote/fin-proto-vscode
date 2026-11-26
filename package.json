@@ -92,7 +92,7 @@
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
     "test": "jest",
-    "test-integration": "npm run compile-tests && vscode-test"
+    "test-integration": "npm run compile-tests && node esbuild.js && vscode-test"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

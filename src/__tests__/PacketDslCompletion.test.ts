@@ -60,17 +60,53 @@ describe('PacketDslCompletion', () => {
     expect(labels).not.toContain('PriceType');
   });
 
-  it('suggests keywords, types, metas and fields in packet body', () => {
+  it('suggests types, metas and packets at field-start position only', () => {
     const model = parse(dsl);
     const before = dsl.slice(0, dsl.indexOf('@lengthOf'));
     const items = computeCompletions(before, model);
     const labels = items.map(i => i.label);
-    expect(labels).toContain('packet');
     expect(labels).toContain('uint32');
     expect(labels).toContain('PriceType');
-    expect(labels).toContain('bodyLen');
+    expect(labels).toContain('Logon');
+    expect(labels).toContain('repeat');
+    // field names are free-form, so they are not suggested at the type position
+    expect(labels).not.toContain('bodyLen');
     expect(labels).not.toContain('seq');
+    // 'packet' is a top-level keyword, not valid inside a packet body
+    expect(labels).not.toContain('packet');
+  });
+
+  it('returns nothing while typing inside a line comment', () => {
+    const model = parse(dsl);
+    const items = computeCompletions('  // some comment ui', model);
+    expect(items).toHaveLength(0);
+  });
+
+  it('returns nothing mid-declaration after a complete type word', () => {
+    const model = parse(dsl);
+    const items = computeCompletions('packet P {\n  uint32 myfi', model);
+    expect(items).toHaveLength(0);
+  });
+
+  it('suggests only basic types inside MetaData blocks', () => {
+    const model = parse(dsl);
+    const before = dsl.slice(0, dsl.indexOf('int64 value'));
+    const items = computeCompletions(before, model);
+    const labels = items.map(i => i.label);
+    expect(labels).toContain('uint32');
     expect(labels).toContain('zchar[N]');
+    expect(labels).not.toContain('PriceType');
+    expect(labels).not.toContain('packet');
+  });
+
+  it('suggests only top-level constructs at file scope', () => {
+    const items = computeCompletions('', undefined);
+    const labels = items.map(i => i.label);
+    expect(labels).toContain('packet');
+    expect(labels).toContain('MetaData');
+    expect(labels).toContain('options');
+    expect(labels).not.toContain('uint32');
+    expect(labels).not.toContain('repeat');
   });
 
   it('suggests field names inside lengthOf argument', () => {

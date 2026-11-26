@@ -1,4 +1,5 @@
 import { BinaryModel, Packet } from './model';
+import { stripCommentsAndStrings } from './PacketDslNavigation';
 
 export type CompletionKind = 'keyword' | 'type' | 'attribute' | 'metadata' | 'packet' | 'field' | 'option' | 'optionValue' | 'snippet';
 
@@ -8,13 +9,16 @@ export interface DslCompletionItem {
   detail?: string;
 }
 
-const keywords: DslCompletionItem[] = [
+const topLevelKeywords: DslCompletionItem[] = [
   { label: 'root', kind: 'keyword', detail: 'root packet' },
   { label: 'packet', kind: 'keyword' },
   { label: 'MetaData', kind: 'keyword' },
   { label: 'options', kind: 'keyword' },
-  { label: 'match', kind: 'keyword', detail: 'match <key> as <name> { ... }' },
+];
+
+const fieldStartKeywords: DslCompletionItem[] = [
   { label: 'repeat', kind: 'keyword' },
+  { label: 'match', kind: 'keyword', detail: 'match <key> as <name> { ... }' },
 ];
 
 const attributes: DslCompletionItem[] = [
@@ -103,11 +107,20 @@ const optionValues: Record<string, string[]> = {
  * Compute completion candidates for a cursor position in a DSL document.
  * Pure text/model based so it is testable without a VSCode runtime.
  *
+ * Context-aware: nothing inside line comments, no candidates mid-declaration
+ * (after a complete type word), types only inside MetaData blocks, top-level
+ * keywords at file scope, field names only in attribute argument positions.
+ *
  * @param textBeforeCursor full document text up to the cursor
  * @param model parsed model of the document (may be undefined when parse failed)
  */
 export function computeCompletions(textBeforeCursor: string, model: BinaryModel | undefined): DslCompletionItem[] {
   const linePrefix = textBeforeCursor.slice(textBeforeCursor.lastIndexOf('\n') + 1);
+
+  // inside a line comment -> no suggestions
+  if (linePrefix.includes('//')) {
+    return [];
+  }
 
   // completing the argument of @lengthOf(...) / @calculatedFrom("...") -> field names
   const attrArg = linePrefix.match(/@(lengthOf|calculatedFrom)\s*\(\s*("?)([^")]*)$/);
@@ -139,18 +152,54 @@ export function computeCompletions(textBeforeCursor: string, model: BinaryModel 
     return prefixFilter(packetItems(model), linePrefix.trimStart());
   }
 
-  const items: DslCompletionItem[] = [
-    ...keywords,
-    ...basicTypes,
-    ...fixedStringTypes,
-    ...typeAliases,
-    ...attributes,
-    ...snippets,
-    ...metaItems(model),
-    ...packetItems(model),
-    ...fieldItems(model, textBeforeCursor),
-  ];
-  return prefixFilter(items, linePrefix.trimStart());
+  // structural position: how many identifiers on the current line?
+  const trimmed = linePrefix.trimStart();
+  const words = trimmed.length ? trimmed.split(/\s+/) : [];
+  if (words.length >= 2) {
+    // mid declaration, e.g. "uint32 myfi|" — field names are free-form
+    return [];
+  }
+
+  // first token on the line: scope decides what can start here
+  if (isInsideBlock(textBeforeCursor, 'MetaData')) {
+    // MetaData declarations always start with a type
+    return prefixFilter([...basicTypes, ...fixedStringTypes, ...typeAliases], trimmed);
+  }
+  const stripped = textBeforeCursor
+    .split('\n')
+    .map(stripCommentsAndStrings)
+    .join('\n');
+  if (braceDepth(stripped) === 0) {
+    // file scope: only top-level constructs
+    return prefixFilter([...topLevelKeywords, ...snippets], trimmed);
+  }
+  // packet / inner-object body: a field definition start
+  return prefixFilter(
+    [
+      ...fieldStartKeywords,
+      ...basicTypes,
+      ...fixedStringTypes,
+      ...typeAliases,
+      ...metaItems(model),
+      ...packetItems(model),
+    ],
+    trimmed
+  );
+}
+
+/**
+ * Brace depth of the text before the cursor after comments/strings are removed.
+ */
+function braceDepth(text: string): number {
+  let depth = 0;
+  for (const ch of text) {
+    if (ch === '{') {
+      depth++;
+    } else if (ch === '}') {
+      depth--;
+    }
+  }
+  return depth;
 }
 
 function prefixFilter(items: DslCompletionItem[], prefix: string): DslCompletionItem[] {

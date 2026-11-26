@@ -161,7 +161,11 @@ export function computeFoldingRanges(text: string): FlatFoldingRange[] {
   return ranges;
 }
 
-function stripCommentsAndStrings(line: string): string {
+/**
+ * Remove line comments and quoted/backtick strings from a single line so
+ * braces inside them are not counted.
+ */
+export function stripCommentsAndStrings(line: string): string {
   let out = '';
   let inString: string | null = null;
   for (let i = 0; i < line.length; i++) {
@@ -192,53 +196,124 @@ export interface EditSpan {
   length: number;
 }
 
+export interface ReferenceSpan extends EditSpan {
+  kind: 'declaration' | 'reference';
+}
+
 /**
- * Compute every occurrence that must change when renaming the symbol under
- * the cursor. References are derived from the model (exact token positions),
- * plus attribute arguments scanned from the raw text:
+ * Collect the declaration and every reference of the symbol under the cursor.
+ * References are derived from the model (exact token positions), plus
+ * attribute arguments scanned from the raw text:
  * - packet   -> declaration + match pair values
  * - field    -> declaration + match key usages + @lengthOf/@calculatedFrom args
  * - meta/blk -> declaration + declared-type identifiers of fields and meta entries
  */
-export function computeRename(model: BinaryModel, text: string, oldName: string, newName: string, cursorLine: number): EditSpan[] {
-  if (!isValidIdentifier(oldName) || !isValidIdentifier(newName)) {
+export function collectReferences(model: BinaryModel, text: string, word: string, cursorLine: number): ReferenceSpan[] {
+  if (!isValidIdentifier(word)) {
     return [];
   }
-  const target = resolveDefinition(model, oldName, cursorLine);
+  const target = resolveDefinition(model, word, cursorLine);
   if (!target) {
     return [];
   }
-  const spans: EditSpan[] = [{ line: target.line, col: target.col, length: oldName.length }];
+  const spans: ReferenceSpan[] = [{ line: target.line, col: target.col, length: word.length, kind: 'declaration' }];
 
   if (target.kind === 'packet') {
     forEachMatchPair(model, (pair, _field) => {
-      if (pair.value === oldName && pair.valueLine > 0) {
-        spans.push({ line: pair.valueLine, col: pair.valueCol, length: oldName.length });
+      if (pair.value === word && pair.valueLine > 0) {
+        spans.push({ line: pair.valueLine, col: pair.valueCol, length: word.length, kind: 'reference' });
       }
     });
   } else if (target.kind === 'field') {
     for (const pkt of model.packets) {
       for (const f of pkt.fields) {
-        if (f.type === 'match' && f.matchType === oldName && f.matchKeyLine > 0) {
-          spans.push({ line: f.matchKeyLine, col: f.matchKeyCol, length: oldName.length });
+        if (f.type === 'match' && f.matchType === word && f.matchKeyLine > 0) {
+          spans.push({ line: f.matchKeyLine, col: f.matchKeyCol, length: word.length, kind: 'reference' });
         }
       }
     }
-    spans.push(...findAttributeArgReferences(text, oldName));
+    for (const span of findAttributeArgReferences(text, word)) {
+      spans.push({ ...span, kind: 'reference' });
+    }
   } else {
     // metaBlock or meta entry: rename declared-type identifier references
     forEachFieldDeep(model, f => {
-      if (f.declaredType === oldName && f.typeLine > 0) {
-        spans.push({ line: f.typeLine, col: f.typeCol, length: oldName.length });
+      if (f.declaredType === word && f.typeLine > 0) {
+        spans.push({ line: f.typeLine, col: f.typeCol, length: word.length, kind: 'reference' });
       }
     });
     for (const meta of model.metaDataMap.values()) {
-      if (meta.type === oldName && meta.typeLine > 0) {
-        spans.push({ line: meta.typeLine, col: meta.typeCol, length: oldName.length });
+      if (meta.type === word && meta.typeLine > 0) {
+        spans.push({ line: meta.typeLine, col: meta.typeCol, length: word.length, kind: 'reference' });
       }
     }
   }
   return dedupeSpans(spans);
+}
+
+/**
+ * Every occurrence that must change when renaming the symbol under the cursor.
+ */
+export function computeRename(model: BinaryModel, text: string, oldName: string, newName: string, cursorLine: number): EditSpan[] {
+  if (!isValidIdentifier(newName)) {
+    return [];
+  }
+  return collectReferences(model, text, oldName, cursorLine);
+}
+
+/**
+ * Returns a human-readable reason when renaming to `newName` would collide
+ * with an existing definition in the same namespace, undefined otherwise.
+ */
+export function detectRenameCollision(model: BinaryModel, word: string, newName: string, cursorLine: number): string | undefined {
+  const target = resolveDefinition(model, word, cursorLine);
+  if (!target) {
+    return undefined;
+  }
+  switch (target.kind) {
+    case 'packet':
+      if (model.packetMaps.has(newName)) {
+        return `packet "${newName}" 已存在`;
+      }
+      if (model.metaBlockPositions.has(newName)) {
+        return `MetaData 块 "${newName}" 已存在`;
+      }
+      return undefined;
+    case 'metaBlock':
+      if (model.metaBlockPositions.has(newName)) {
+        return `MetaData 块 "${newName}" 已存在`;
+      }
+      if (model.packetMaps.has(newName)) {
+        return `packet "${newName}" 已存在`;
+      }
+      return undefined;
+    case 'meta':
+      if (model.metaDataMap.has(newName)) {
+        return `MetaData 字段 "${newName}" 已存在`;
+      }
+      return undefined;
+    default: {
+      // field: names must stay unique within their packet
+      const owner = findPacketContainingField(model, word, target.line);
+      if (!owner) {
+        return undefined;
+      }
+      const clash = (fields: Field[]): boolean =>
+        fields.some(f => f.name === newName && !(f.nameLine === target.line && f.name === word)) ||
+        fields.some(f => f.inerObject ? clash(f.inerObject.fields) : false);
+      if (clash(owner.fields)) {
+        return `字段 "${newName}" 在 packet ${owner.name} 中已存在`;
+      }
+      return undefined;
+    }
+  }
+}
+
+function findPacketContainingField(model: BinaryModel, name: string, declLine: number): Packet | undefined {
+  const contains = (fields: Field[]): boolean =>
+    fields.some(f => f.name === name && f.nameLine === declLine) ||
+    fields.some(f => f.inerObject && contains(f.inerObject.fields));
+  return model.packets.find(pkt => contains(pkt.fields));
 }
 
 function isValidIdentifier(name: string): boolean {
@@ -325,7 +400,7 @@ function computeLineStarts(text: string): number[] {
   return starts;
 }
 
-function dedupeSpans(spans: EditSpan[]): EditSpan[] {
+function dedupeSpans<T extends EditSpan>(spans: T[]): T[] {
   const seen = new Set<string>();
   return spans.filter(s => {
     const key = `${s.line}:${s.col}`;

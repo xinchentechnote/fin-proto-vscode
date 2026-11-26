@@ -1,7 +1,125 @@
-import { computeRename } from "../parser/PacketDslNavigation";
+import { computeRename, collectReferences, detectRenameCollision } from "../parser/PacketDslNavigation";
+import { buildQuickFixes } from "../parser/PacketDslCodeActions";
 import { formatDslSegments } from "../parser/PacketDslFormattor";
 import { WorkspaceIndex } from "../parser/WorkspaceIndex";
 import { parsePacketDsl } from "../parser/PacketDslModelParser";
+
+describe('collectReferences', () => {
+  const dsl = `packet Logon {
+  uint32 seq,
+}
+
+root packet Session {
+  @lengthOf(bodyLen)
+  uint16 bodyLen,
+  match type as Body {
+    1 : Logon,
+  },
+}`;
+  const model = () => parsePacketDsl(dsl);
+
+  it('collects declaration and match value references for a packet', () => {
+    const refs = collectReferences(model(), dsl, 'Logon', 1);
+    expect(refs).toHaveLength(2);
+    expect(refs[0].kind).toBe('declaration');
+    expect(refs[1].kind).toBe('reference');
+    expect(refs[1].line).toBe(9);
+  });
+
+  it('collects field references in attribute arguments and match keys', () => {
+    const refs = collectReferences(model(), dsl, 'bodyLen', 7);
+    expect(refs.map(r => `${r.line}:${r.col}`)).toEqual(['7:9', '6:12']);
+    expect(refs[0].kind).toBe('declaration');
+    expect(refs[1].kind).toBe('reference');
+  });
+
+  it('resolves from a reference position back to the same symbol', () => {
+    // cursor on the match value "Logon" (line 9)
+    const refs = collectReferences(model(), dsl, 'Logon', 9);
+    expect(refs).toHaveLength(2);
+    expect(refs[0].line).toBe(1);
+  });
+});
+
+describe('detectRenameCollision', () => {
+  const dsl = `packet A { uint32 x, }
+packet B { uint32 y, }
+MetaData M { int64 v, }`;
+  const model = () => parsePacketDsl(dsl);
+
+  it('detects packet name collisions', () => {
+    expect(detectRenameCollision(model(), 'A', 'B', 1)).toContain('已存在');
+    expect(detectRenameCollision(model(), 'A', 'M', 1)).toContain('已存在');
+    expect(detectRenameCollision(model(), 'A', 'Unique', 1)).toBeUndefined();
+  });
+
+  it('detects field name collisions within the same packet only', () => {
+    const two = `packet P { uint32 x, string y, }`;
+    expect(detectRenameCollision(parsePacketDsl(two), 'x', 'y', 1)).toContain('已存在');
+    expect(detectRenameCollision(parsePacketDsl(two), 'x', 'z', 1)).toBeUndefined();
+    // same field name in another packet is fine
+    expect(detectRenameCollision(model(), 'x', 'y', 1)).toBeUndefined();
+  });
+
+  it('detects meta block and entry collisions', () => {
+    expect(detectRenameCollision(model(), 'M', 'A', 3)).toContain('已存在');
+    expect(detectRenameCollision(model(), 'M', 'N', 3)).toBeUndefined();
+  });
+});
+
+describe('buildQuickFixes', () => {
+  it('offers a MetaData skeleton for unknown field types', () => {
+    const text = 'packet P {\n  DataType myDate,\n}';
+    const fixes = buildQuickFixes(
+      [{ message: 'Unknown field type: DataType in packet P', line: 1, col: 2 }],
+      text
+    );
+    expect(fixes).toHaveLength(1);
+    expect(fixes[0].title).toBe('创建 MetaData "DataType"');
+    expect(fixes[0].edits[0].newText).toContain('MetaData DataType {');
+    expect(fixes[0].edits[0].startLine).toBe(2); // appended at end of document
+  });
+
+  it('offers a packet skeleton for unknown match values', () => {
+    const text = 'packet P {\n  match t as B {\n    1 : Missing,\n  },\n}';
+    const fixes = buildQuickFixes(
+      [{ message: 'Unknown match value: Missing in field B of packet P', line: 2, col: 8 }],
+      text
+    );
+    expect(fixes[0].title).toBe('创建 packet "Missing"');
+    expect(fixes[0].edits[0].newText).toContain('packet Missing {');
+  });
+
+  it('offers a trailing comma fix on the previous field line', () => {
+    const text = 'packet P {\n  uint32 a\n  uint32 b,\n}';
+    // ANTLR reports the error on line 2 ("uint32 b")
+    const fixes = buildQuickFixes(
+      [{ message: "mismatched input 'uint32' expecting ','", line: 2, col: 2 }],
+      text
+    );
+    expect(fixes).toHaveLength(1);
+    expect(fixes[0].edits[0].startLine).toBe(1);
+    expect(fixes[0].edits[0].startCol).toBe(10);
+    expect(fixes[0].edits[0].newText).toBe(',');
+  });
+
+  it('does not offer the comma fix when a comma is already present', () => {
+    const text = 'packet P {\n  uint32 a,\n  uint32 b,\n}';
+    const fixes = buildQuickFixes(
+      [{ message: "extraneous input 'uint32' expecting...", line: 2, col: 2 }],
+      text
+    );
+    expect(fixes).toHaveLength(0);
+  });
+
+  it('ignores unrelated diagnostics', () => {
+    const fixes = buildQuickFixes(
+      [{ message: 'Duplicate packet definition: A', line: 1, col: 0 }],
+      'packet A {}\npacket A {}'
+    );
+    expect(fixes).toHaveLength(0);
+  });
+});
 
 describe('WorkspaceIndex', () => {
   const fileA = 'file:///a.pdsl';

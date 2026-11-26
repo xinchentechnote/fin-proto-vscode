@@ -6,6 +6,10 @@ All notable changes to the "fin-proto-vscode" extension will be documented in th
 
 ### Added
 
+- 查找引用（Shift+F12）与同文件符号高亮（Document Highlight）。
+- 快速修复（Code Actions）：未定义类型引用生成 MetaData 骨架、未知 match 值生成 packet 骨架、缺失尾逗号自动补插入。
+- 补全按语法位置过滤：注释内不弹候选；字段类型位只出类型/MetaData/packet；MetaData 块内只出基础类型；文件顶层只出顶层关键字；声明中段不再弹无关候选。
+- 重命名碰撞检测：目标名称与同 packet 字段 / packet / MetaData 命名空间冲突时中断并提示。
 - 诊断新增：`@lengthOf` 目标字段存在性、`match` key 必须是本 packet 已声明字段。
 - `fin-proto:compile` 的编译器错误输出解析进问题面板（独立 `fin-proto-compile` 诊断集合，编辑文件即清除），可点击跳转。
 - 扩展元数据：publisher、图标、关键词与分类；CI 上传 vsix artifact；新增集成测试（`@vscode/test-cli`，覆盖诊断/补全/定义/重命名/格式化/工作区符号）。

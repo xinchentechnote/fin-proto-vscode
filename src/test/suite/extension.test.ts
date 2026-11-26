@@ -59,7 +59,9 @@ suite('fin-proto-vscode integration', () => {
 		);
 		const labels = (result?.items ?? []).map(i => String(i.label));
 		assert.ok(labels.includes('uint32'), `missing uint32 in [${labels}]`);
-		assert.ok(labels.includes('packet'));
+		// field-start position inside a packet: 'repeat' is valid, top-level 'packet' is not
+		assert.ok(labels.includes('repeat'));
+		assert.ok(!labels.includes('packet'));
 	});
 
 	test('definition provider resolves match value to packet declaration', async () => {
@@ -99,9 +101,28 @@ suite('fin-proto-vscode integration', () => {
 		await openDsl('packet WorkspaceFindable { uint32 x, }\n');
 		// wait past the diagnostic debounce so the workspace index picks it up
 		await new Promise(resolve => setTimeout(resolve, 800));
-		const symbols = (await (vscode.commands as any).executeCommand(
+		const symbols = await (vscode.commands as any).executeCommand(
 			'vscode.executeWorkspaceSymbolProvider', 'WorkspaceFindable'
-		)) as vscode.SymbolInformation[];
+		) as vscode.SymbolInformation[];
 		assert.ok(symbols && symbols.some((s: vscode.SymbolInformation) => s.name === 'WorkspaceFindable'), 'packet not found in workspace symbols');
+	});
+
+	test('reference provider finds declaration and match values', async () => {
+		const dsl = 'packet Logon { uint32 x, }\nroot packet R {\n  uint32 type,\n  match type as Body {\n    1 : Logon,\n  },\n}\n';
+		const doc = await openDsl(dsl);
+		const refs = await vscode.commands.executeCommand<vscode.Location[]>(
+			'vscode.executeReferenceProvider', doc.uri, new vscode.Position(0, 8), { includeDeclaration: true }
+		);
+		assert.ok(refs && refs.length === 2, `expected declaration + match value, got ${refs?.length}`);
+	});
+
+	test('code actions offer MetaData skeleton for unknown field types', async () => {
+		const doc = await openDsl('packet P {\n  DataType myDate,\n}\n');
+		// wait for diagnostics to be produced, then request code actions at that position
+		await waitFor(() => (vscode.languages.getDiagnostics(doc.uri).length > 0 ? true : undefined));
+		const actions = await vscode.commands.executeCommand<vscode.CodeAction[]>(
+			'vscode.executeCodeActionProvider', doc.uri, new vscode.Range(1, 2, 1, 10)
+		);
+		assert.ok(actions && actions.some(a => a.title === '创建 MetaData "DataType"'), `got [${actions?.map(a => a.title)}]`);
 	});
 });
