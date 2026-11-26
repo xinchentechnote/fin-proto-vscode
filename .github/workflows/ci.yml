@@ -29,7 +29,25 @@ jobs:
       - name: esbuild
         run: yarn compile
 
+      - name: Install GUI dependencies
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y \
+            libgtk-3-0 libxss1 libasound2t64 libnss3 \
+            libx11-xcb1 libxcomposite1 libxdamage1 \
+            libxrandr2 libgbm1 libxshmfence1 libxrender1 libxtst6 \
+            xvfb
+
+      - name: Run integration tests
+        run: xvfb-run -a yarn test-integration
+
       - name: Install vsce
         run: yarn global add vsce
       - name: Package extension
         run: yarn package
+
+      - name: Upload extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fin-proto-vscode-vsix
+          path: "*.vsix"

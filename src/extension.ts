@@ -8,6 +8,7 @@ import { computeCompletions, snippetBodies, DslCompletionItem } from './parser/P
 import { BinaryModel } from './parser/model';
 import { buildDocumentSymbols, computeFoldingRanges, resolveDefinition, computeRename, FlatSymbol } from './parser/PacketDslNavigation';
 import { WorkspaceIndex } from './parser/WorkspaceIndex';
+import { parseCompileErrors } from './parser/FinProtocOutput';
 
 const PACKETDSL = { language: 'packetdsl' };
 const DIAGNOSTIC_DEBOUNCE_MS = 300;
@@ -22,8 +23,9 @@ const COMPILE_TARGETS = [
 
 export function activate(context: vscode.ExtensionContext) {
 	const diagnosticCollection = vscode.languages.createDiagnosticCollection('fin-proto');
+	const compileDiagnostics = vscode.languages.createDiagnosticCollection('fin-proto-compile');
 	const outputChannel = vscode.window.createOutputChannel('fin-proto');
-	context.subscriptions.push(diagnosticCollection, outputChannel);
+	context.subscriptions.push(diagnosticCollection, compileDiagnostics, outputChannel);
 
 	// parsed models keyed by document uri, reused by completions between edits
 	const modelCache = new Map<string, { version: number; model: BinaryModel }>();
@@ -116,7 +118,11 @@ export function activate(context: vscode.ExtensionContext) {
 	};
 
 	context.subscriptions.push(
-		vscode.workspace.onDidChangeTextDocument(e => scheduleParse(e.document)),
+		vscode.workspace.onDidChangeTextDocument(e => {
+			// compile diagnostics are stale once the file changes
+			compileDiagnostics.delete(e.document.uri);
+			scheduleParse(e.document);
+		}),
 		vscode.workspace.onDidOpenTextDocument(scheduleParse),
 		vscode.workspace.onDidCloseTextDocument(document => {
 			const key = document.uri.toString();
@@ -127,6 +133,7 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 			modelCache.delete(key);
 			diagnosticCollection.delete(document.uri);
+			compileDiagnostics.delete(document.uri);
 		})
 	);
 	vscode.workspace.textDocuments.forEach(scheduleParse);
@@ -278,7 +285,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('fin-proto-vscode.compile', () => compileActiveDocument(outputChannel))
+		vscode.commands.registerCommand('fin-proto-vscode.compile', () => compileActiveDocument(outputChannel, compileDiagnostics))
 	);
 }
 
@@ -345,8 +352,12 @@ function completionKind(kind: DslCompletionItem['kind']): vscode.CompletionItemK
 /**
  * Compile the active DSL file by invoking the fin-protoc CLI.
  * The binary location can be configured via the `finProto.protocPath` setting.
+ * Positional errors from the compiler output are surfaced in the problems panel.
  */
-async function compileActiveDocument(outputChannel: vscode.OutputChannel) {
+async function compileActiveDocument(
+	outputChannel: vscode.OutputChannel,
+	compileDiagnostics: vscode.DiagnosticCollection
+) {
 	const editor = vscode.window.activeTextEditor;
 	if (!editor || editor.document.languageId !== PACKETDSL.language) {
 		vscode.window.showErrorMessage('请先打开一个 packetdsl 文件');
@@ -375,6 +386,7 @@ async function compileActiveDocument(outputChannel: vscode.OutputChannel) {
 	outputChannel.show(true);
 	outputChannel.appendLine(`> ${binary} compile -f ${dslPath}`);
 	document.save();
+	compileDiagnostics.delete(document.uri);
 
 	const args = ['compile', '-f', dslPath];
 	for (const target of targets) {
@@ -394,6 +406,16 @@ async function compileActiveDocument(outputChannel: vscode.OutputChannel) {
 	child.on('close', code => {
 		if (output) {
 			outputChannel.appendLine(output);
+		}
+		const compileErrors = parseCompileErrors(output);
+		if (compileErrors.length > 0) {
+			compileDiagnostics.set(document.uri, compileErrors.map(error =>
+				new vscode.Diagnostic(
+					new vscode.Range(error.line - 1, Math.max(error.col - 1, 0), error.line - 1, Math.max(error.col - 1, 0) + 1),
+					error.msg,
+					vscode.DiagnosticSeverity.Error
+				)
+			));
 		}
 		if (code === 0) {
 			vscode.window.showInformationMessage(`编译成功: ${targets.map(t => t.label).join(', ')} → ${outDir}`);

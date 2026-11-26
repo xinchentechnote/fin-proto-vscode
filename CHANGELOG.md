@@ -6,6 +6,9 @@ All notable changes to the "fin-proto-vscode" extension will be documented in th
 
 ### Added
 
+- 诊断新增：`@lengthOf` 目标字段存在性、`match` key 必须是本 packet 已声明字段。
+- `fin-proto:compile` 的编译器错误输出解析进问题面板（独立 `fin-proto-compile` 诊断集合，编辑文件即清除），可点击跳转。
+- 扩展元数据：publisher、图标、关键词与分类；CI 上传 vsix artifact；新增集成测试（`@vscode/test-cli`，覆盖诊断/补全/定义/重命名/格式化/工作区符号）。
 - 跨文件支持：工作区符号搜索（Ctrl+T，跨所有 `.pdsl`/`.dsl` 文件搜索 packet/MetaData/meta 成员）、跳转定义的工作区回退、未打开文件的后台索引。
 - 重命名重构（F2）：字段（含 `@lengthOf`/`@calculatedFrom` 参数与 match key 引用）、packet（含 match 分派值引用）、MetaData 块/成员（含声明类型引用）。
 - 区域格式化（Format Selection）：按顶层块（packet/MetaData/options）局部重排，不影响选区外内容。

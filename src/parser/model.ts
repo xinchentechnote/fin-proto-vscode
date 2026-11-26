@@ -152,16 +152,22 @@ export class BinaryModel {
   }
 
   validatePacket(packet: Packet) {
-    let fieldNames = new Set<string>();
+    const seen = new Set<string>();
+    const fieldNames = new Set(packet.fields.map(f => f.name));
     for (const field of packet.fields) {
-      if (fieldNames.has(field.name)) {
+      if (seen.has(field.name)) {
         this.addSyntaxError(
           new DslSyntaxError(field.line, field.startIndex, field.stopIndex, `Duplicate field name: ${field.name} in packet ${packet.name}`)
         );
       } else {
-        fieldNames.add(field.name);
+        seen.add(field.name);
       }
       if (field.type === "match") {
+        if (field.matchType && !fieldNames.has(field.matchType)) {
+          this.addSyntaxError(
+            new DslSyntaxError(field.matchKeyLine, field.matchKeyCol, field.matchKeyCol + (field.matchType?.length ?? 1), `Unknown match key: ${field.matchType} in packet ${packet.name}`)
+          );
+        }
         let keys = new Set<string>();
         field.matchPairs.forEach(pair => {
           if (keys.has(pair.key)) {
@@ -177,6 +183,11 @@ export class BinaryModel {
             keys.add(pair.key);
           }
         });
+      }
+      if (field.lengthOfField && !fieldNames.has(field.lengthOfField)) {
+        this.addSyntaxError(
+          new DslSyntaxError(field.line, field.startIndex, field.stopIndex, `Unknown lengthOf target: ${field.lengthOfField} in packet ${packet.name}`)
+        );
       }
       if (field.inerObject) {
         this.validatePacket(field.inerObject);

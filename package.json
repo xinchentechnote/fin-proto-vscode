@@ -1,18 +1,27 @@
 {
   "name": "fin-proto-vscode",
-  "displayName": "fin-proto-vscode",
+  "displayName": "FinProto - PacketDSL Support",
   "description": "financial binary proto dsl plugin",
   "repository": {
     "type": "git",
     "url": "https://github.com/xinchentechnote/fin-proto-vscode.git"
   },
+  "publisher": "xinchentechnote",
+  "icon": "icon.png",
   "license": "MIT",
   "version": "0.1.0",
   "engines": {
     "vscode": "^1.100.0"
   },
   "categories": [
-    "Other"
+    "Programming Languages",
+    "Formatters"
+  ],
+  "keywords": [
+    "packetdsl",
+    "protocol",
+    "fin-protoc",
+    "binary protocol"
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
@@ -70,26 +79,30 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "yarn compile",
+    "vscode:prepublish": "npm run compile",
     "gen": "cp submodules/fin-protoc/grammar/PacketDsl.g4 PacketDsl.g4 && npx antlr4ts -o src/parser/antlr4 -visitor PacketDsl.g4 && rm PacketDsl.g4",
-    "compile": "yarn run check-types && yarn run lint && node esbuild.js",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
     "watch": "npm-run-all -p watch:*",
     "watch:esbuild": "node esbuild.js --watch",
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
     "package": "vsce package",
-    "compile-tests": "tsc -p . --outDir out",
+    "compile-tests": "tsc -p . --outDir out && tsc -p src/test",
     "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "yarn run compile-tests && yarn run compile && yarn run lint",
+    "pretest": "npm run compile-tests && npm run compile",
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
-    "test": "jest"
+    "test": "jest",
+    "test-integration": "npm run compile-tests && vscode-test"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
+    "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
     "@types/vscode": "^1.100.0",
     "@typescript-eslint/eslint-plugin": "^8.31.1",
     "@typescript-eslint/parser": "^8.31.1",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.1.0",
     "antlr4ts": "^0.5.0-alpha.4",
     "antlr4ts-cli": "^0.5.0-alpha.4",
     "esbuild": "^0.25.3",

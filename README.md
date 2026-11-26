@@ -9,7 +9,8 @@ FinProto VSCode Extension — 为金融二进制协议 DSL（PacketDSL）提供 
 - **实时诊断**：语法错误（ANTLR error listener）+ 语义校验：
   - 重复的 MetaData / option / packet / 字段定义
   - 未知字段类型、未知 match 目标 packet、重复 match key
-  - `@lengthOf` 只能出现在 root packet 且最多一个
+  - `@lengthOf` 只能出现在 root packet、至多一个、且目标字段必须存在
+  - `match` 的 key 必须是本 packet 已声明的字段
   - 未知 option / option 非法取值、循环 MetaData 引用
 - **代码补全**：关键字、内建类型、字段属性、已定义的 MetaData 块/字段/packet 名称；`@lengthOf(...)`、`@calculatedFrom("...")` 参数位置补全当前 packet 的字段名；`options {}` 块内补全 option 名与合法取值；`match` 块内补全 packet 名。
 - **代码导航**：
@@ -21,7 +22,7 @@ FinProto VSCode Extension — 为金融二进制协议 DSL（PacketDSL）提供 
 - **重命名重构**（F2）：字段（含 `@lengthOf`、`@calculatedFrom` 参数、match key 引用）、packet（含 match 分派值引用）、MetaData 块/成员（含声明类型引用）。
 - **区域格式化**：选中部分 DSL 后 Format Selection（Ctrl+K Ctrl+F），只重排选中的顶层块，不影响其它内容。
 - **代码片段**：`packet` / `rpacket` / `metadata` / `match` / `options` / `lengthof` / `checksum` / `zchar` 等模板。
-- **编译**：命令 `fin-proto:compile` 调用 [fin-protoc](https://github.com/xinchentechnote/fin-protoc) CLI，将当前 DSL 编译为 Go / Java / Rust / Lua / Python / C++。
+- **编译**：命令 `fin-proto:compile` 调用 [fin-protoc](https://github.com/xinchentechnote/fin-protoc) CLI，将当前 DSL 编译为 Go / Java / Rust / Lua / Python / C++；编译器报告的错误会解析后显示在问题面板，可点击跳转。
 
 ## 编译器配置
 
@@ -40,10 +41,11 @@ git submodule update --init
 yarn gen
 
 # 构建 / 测试
-yarn compile     # tsc + eslint + esbuild
-yarn test        # jest 单元测试
-yarn watch       # 开发模式
-yarn package     # 打包 .vsix（需配置 publisher）
+yarn compile           # tsc + eslint + esbuild
+yarn test              # jest 单元测试
+yarn test-integration  # 集成测试（@vscode/test-cli，首次会下载 VSCode；Linux 需 xvfb）
+yarn watch             # 开发模式
+yarn package           # 打包 .vsix（publisher 已配置为 xinchentechnote）
 ```
 
 ANTLR grammar 的单一来源是 `submodules/fin-protoc/grammar/PacketDsl.g4`，不要手改 `src/parser/antlr4/` 下的生成代码。

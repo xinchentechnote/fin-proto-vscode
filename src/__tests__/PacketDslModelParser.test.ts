@@ -170,6 +170,47 @@ describe('PacketDslModelParser', () => {
     expect(unknownErrors[0].msg).toContain('UnknownPacket');
   });
 
+  it('validates lengthOf target and match key existence', () => {
+    const bad = `
+      packet P {
+        @lengthOf(missing)
+        uint16 len,
+        match kind as Body {
+          1 : A,
+        },
+      }
+    `;
+    const badModel = parsePacketDsl(bad);
+    expect(badModel.syntaxErrors.some(e => e.msg.includes('Unknown lengthOf target: missing'))).toBe(true);
+    expect(badModel.syntaxErrors.some(e => e.msg.includes('Unknown match key: kind'))).toBe(true);
+
+    const good = `
+      packet A { uint32 x, }
+      packet P {
+        uint32 kind,
+        @lengthOf(kind)
+        uint16 len,
+        match kind as Body {
+          1 : A,
+        },
+      }
+    `;
+    const goodModel = parsePacketDsl(good);
+    expect(goodModel.syntaxErrors.filter(e => e.msg.includes('lengthOf') || e.msg.includes('match key'))).toHaveLength(0);
+  });
+
+  it('validates lengthOf target declared after the referencing field', () => {
+    const dsl = `
+      root packet P {
+        @lengthOf(body)
+        uint16 len,
+        char[] body,
+      }
+    `;
+    const model = parsePacketDsl(dsl);
+    expect(model.syntaxErrors.filter(e => e.msg.includes('lengthOf'))).toHaveLength(0);
+  });
+
   it('rejects unknown metadata references', () => {
     const dsl = `
       MetaData Quote {
